@@ -15,22 +15,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <!-- PWA / 全屏App支持 -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="KEEPro" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="browsermode" content="application">
-    <meta name="full-screen" content="yes" />
-    <meta name="x5-fullscreen" content="true" />
-    <meta name="x5-page-mode" content="app" />
-    <meta name="360-fullscreen" content="true" />
     <meta name="theme-color" content="#26c99a" />
     <title>KEEPro</title>
     <link rel="icon" href="./favicon.ico">
     <link rel="shortcut icon" href="./favicon.ico">
     <link rel="apple-touch-icon" href="./favicon.ico">
-    <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="./css/styles.css"> <!-- 引用外部CSS文件 -->
 </head>
 
@@ -405,34 +394,6 @@
     <script src="js/drawMine.js"></script>
     <script src="js/batch_generate.js"></script>
     <script src="js/onload.js"></script>
-    <!-- PWA Service Worker 注册 -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function () {
-                navigator.serviceWorker.register('./sw.js', { scope: './' })
-                    .then(function (registration) {
-                        console.log('[PWA] Service Worker 注册成功，范围:', registration.scope);
-
-                        // 提示用户可以添加到主屏幕（仅首次访问）
-                        if (!sessionStorage.getItem('pwa_prompt_shown')) {
-                            sessionStorage.setItem('pwa_prompt_shown', '1');
-                            setTimeout(function () {
-                                var msgBox = document.getElementById('messageBox');
-                                if (msgBox) {
-                                    msgBox.innerHTML = '<span style="color:#26c99a;">💡 提示：在浏览器菜单中选择"添加到主屏幕"即可像App一样使用</span>';
-                                    setTimeout(function () {
-                                        msgBox.innerHTML = '';
-                                    }, 5000);
-                                }
-                            }, 2000);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log('[PWA] Service Worker 注册失败:', error);
-                    });
-            });
-        }
-    </script>
 </body>
 
 </html>
