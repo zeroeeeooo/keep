@@ -1,0 +1,18 @@
+{
+  "name": "KEEPro - Keep运动截图生成器",
+  "short_name": "KEEPro",
+  "description": "Keep跑步打卡截图生成工具，支持自定义参数、轨迹绘制和批量生成",
+  "start_url": "./keep.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#26c99a",
+  "icons": [
+    {
+      "src": "./favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "lang": "zh-CN"
+}
