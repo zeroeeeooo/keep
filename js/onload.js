@@ -71,10 +71,10 @@ window.onload = async function () {
             if (data) {
                 username = data.username || username;
                 keep_title = data.keep_title || keep_title;
-                km_min = data.km_min || 2.2;
-                km_max = data.km_max || 3.9;
-                speed_min = data.speed_min || 4.3;
-                speed_max = data.speed_max || 5.2;
+                km_min = (data.km_min != null && !isNaN(data.km_min)) ? data.km_min : 2.2;
+                km_max = (data.km_max != null && !isNaN(data.km_max)) ? data.km_max : 3.9;
+                speed_min = (data.speed_min != null && !isNaN(data.speed_min)) ? data.speed_min : 4.3;
+                speed_max = (data.speed_max != null && !isNaN(data.speed_max)) ? data.speed_max : 5.2;
                 default_bgSRC = data.default_bgSRC || default_bgSRC;
                 display_guijiSelect_id = data.display_guijiSelect_id || display_guijiSelect_id;
                 bs = data.bs;

@@ -44,25 +44,25 @@ function addZero(i) {
 function setData() {
     username = document.getElementById("inpt_username").value;
     keep_title = document.getElementById("inpt_keep_title").value;
-    miles = parseFloat(document.getElementById("inpt_miles").value);
+    miles = parseFloat(document.getElementById("inpt_miles").value) || 0;
 
-    km_min = document.getElementById('min_miles').value;
-    km_max = document.getElementById('max_miles').value;
-    speed_min = document.getElementById('min_speeds').value;
-    speed_max = document.getElementById('max_speeds').value;
-    speeds = parseFloat(document.getElementById("inpt_speeds").value);
+    km_min = parseFloat(document.getElementById('min_miles').value) || 0;
+    km_max = parseFloat(document.getElementById('max_miles').value) || 0;
+    speed_min = parseFloat(document.getElementById('min_speeds').value) || 0;
+    speed_max = parseFloat(document.getElementById('max_speeds').value) || 0;
+    speeds = parseFloat(document.getElementById("inpt_speeds").value) || 0;
 
-    date_year = parseInt(document.getElementById("inpt_year").value);
-    date_month = parseInt(document.getElementById("inpt_month").value);
-    date_day = parseInt(document.getElementById("inpt_day").value);
-    time_hour = parseInt(document.getElementById("inpt_hour").value);
-    time_min = parseInt(document.getElementById("inpt_min").value);
-    temperature = parseInt(document.getElementById("inpt_temperature").value);
-    humidity = parseInt(document.getElementById("inpt_humidity").value);
-    bs_prob = parseFloat(document.getElementById("inpt_bs_prob").value);
-    bs_range_min = parseInt(document.getElementById("inpt_bs_range_min").value);
-    bs_range_max = parseInt(document.getElementById("inpt_bs_range_max").value);
-    savePic_width = parseInt(document.getElementById("inpt_savePic_width").value);
+    date_year = parseInt(document.getElementById("inpt_year").value) || new Date().getFullYear();
+    date_month = parseInt(document.getElementById("inpt_month").value) || (new Date().getMonth() + 1);
+    date_day = parseInt(document.getElementById("inpt_day").value) || new Date().getDate();
+    time_hour = parseInt(document.getElementById("inpt_hour").value) || 0;
+    time_min = parseInt(document.getElementById("inpt_min").value) || 0;
+    temperature = parseInt(document.getElementById("inpt_temperature").value) || 0;
+    humidity = parseInt(document.getElementById("inpt_humidity").value) || 0;
+    bs_prob = parseFloat(document.getElementById("inpt_bs_prob").value) || 0;
+    bs_range_min = parseInt(document.getElementById("inpt_bs_range_min").value) || 0;
+    bs_range_max = parseInt(document.getElementById("inpt_bs_range_max").value) || 0;
+    savePic_width = parseInt(document.getElementById("inpt_savePic_width").value) || 1080;
     auto_draw = document.getElementById("auto_draw_checkbox").checked;
     amap_key = document.getElementById("inpt_amap_key").value;
     render();

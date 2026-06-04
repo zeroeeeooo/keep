@@ -239,11 +239,23 @@ async function startBatchGenerate() {
                 setWeather(randomWeather);
             }
 
-            // 重新随机公里和配速
-            miles = Math.floor((km_min + Math.random() * (km_max - km_min)) * 100) / 100;
-            speeds = Math.floor((speed_min + Math.random() * (speed_max - speed_min)) * 100) / 100;
+            // 重新随机公里和配速（使用批量面板独立范围）
+            let batchKmMin = parseFloat(document.getElementById("batch_km_min").value) || km_min || 2.2;
+            let batchKmMax = parseFloat(document.getElementById("batch_km_max").value) || km_max || 3.9;
+            let batchSpeedMin = parseFloat(document.getElementById("batch_speed_min").value) || speed_min || 4.3;
+            let batchSpeedMax = parseFloat(document.getElementById("batch_speed_max").value) || speed_max || 5.2;
+            if (batchKmMin > batchKmMax) { let tmp = batchKmMin; batchKmMin = batchKmMax; batchKmMax = tmp; }
+            if (batchSpeedMin > batchSpeedMax) { let tmp = batchSpeedMin; batchSpeedMin = batchSpeedMax; batchSpeedMax = tmp; }
+            miles = Math.floor((batchKmMin + Math.random() * (batchKmMax - batchKmMin)) * 100) / 100;
+            speeds = Math.floor((batchSpeedMin + Math.random() * (batchSpeedMax - batchSpeedMin)) * 100) / 100;
             document.getElementById("inpt_miles").value = miles;
             document.getElementById("inpt_speeds").value = speeds;
+
+            // 更新批量面板中的实时公里/配速显示
+            let kmEl = document.getElementById("batch_current_km");
+            let speedEl = document.getElementById("batch_current_speed");
+            if (kmEl) kmEl.textContent = miles.toFixed(2);
+            if (speedEl) speedEl.textContent = speeds.toFixed(2);
 
             // 随机温度
             let tempMin = parseInt(document.getElementById("batch_temp_min").value) || -5;

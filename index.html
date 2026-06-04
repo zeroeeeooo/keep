@@ -295,6 +295,23 @@
                     <span> %</span>
                 </div>
                 <div class="batch-row">
+                    <label>公里范围：</label>
+                    <input type="number" id="batch_km_min" value="2.2" style="width: 60px;" step="0.1">
+                    <span> ~ </span>
+                    <input type="number" id="batch_km_max" value="3.9" style="width: 60px;" step="0.1">
+                    <span> 公里</span>
+                </div>
+                <div class="batch-row">
+                    <label>配速范围：</label>
+                    <input type="number" id="batch_speed_min" value="4.3" style="width: 60px;" step="0.1">
+                    <span> ~ </span>
+                    <input type="number" id="batch_speed_max" value="5.2" style="width: 60px;" step="0.1">
+                    <span> 分钟/公里</span>
+                </div>
+                <div class="batch-row" style="font-size: 14px; color: #26c99a; margin-top: 4px;">
+                    <span>当前：🏃 <span id="batch_current_km">--</span> 公里 &nbsp;|&nbsp; ⏱ <span id="batch_current_speed">--</span> 分钟/公里</span>
+                </div>
+                <div class="batch-row">
                     <label>轨迹模式：</label>
                     <select id="batch_track_mode">
                         <option value="random">随机轨迹</option>
