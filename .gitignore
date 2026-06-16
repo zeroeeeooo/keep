@@ -1,2 +1,8 @@
 # Local Netlify folder
 .netlify
+
+.vercel
+.env
+.env.local
+.env.development
+# .env.production 需要提交，供 Vite 构建使用
