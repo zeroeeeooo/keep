@@ -6,6 +6,7 @@ import { initDB } from './db.js'
 import authRoutes from './routes/auth.js'
 import friendRoutes from './routes/friends.js'
 import noteRoutes from './routes/notes.js'
+import topicRoutes from './routes/topics.js'
 
 const PORT = process.env.PORT || 3001
 
@@ -50,6 +51,9 @@ app.use('/api/friends', friendRoutes)
 
 // 随手一记路由
 app.use('/api/notes', noteRoutes)
+
+// 话题路由
+app.use('/api/topics', topicRoutes)
 
 // 健康检查
 app.get('/api/health', (req, res) => {

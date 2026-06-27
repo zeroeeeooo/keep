@@ -23,20 +23,23 @@
 ## ✨ 功能特性
 
 ### 截图生成核心
-| 功能 | 说明 |
-|------|------|
-| 🖼️ **Keep 风格截图** | 生成与 Keep App 风格一致的运动打卡截图 |
-| 📏 **自定义数据** | 距离（公里）、配速、日期、时间、温度、湿度等均可自由设置 |
-| 🌤️ **自动天气** | 调用**高德地图 API** 获取实时温度与湿度数据 |
-| 🗺️ **运动轨迹** | 支持**手动绘制** / **自动生成**运动路径，轨迹颜色渐变效果 |
-| 💾 **持久化存储** | 修改设置后自动保存至 IndexedDB，刷新不丢失 |
-| 🖨️ **一键下载** | 点击"保存图片"即可生成截图并下载到本地 |
+
+| 功能                        | 说明                                                                  |
+| --------------------------- | --------------------------------------------------------------------- |
+| 🖼️**Keep 风格截图** | 生成与 Keep App 风格一致的运动打卡截图                                |
+| 📏**自定义数据**      | 距离（公里）、配速、日期、时间、温度、湿度等均可自由设置              |
+| 🌤️**自动天气**      | 调用**高德地图 API** 获取实时温度与湿度数据                     |
+| 🗺️**运动轨迹**      | 支持**手动绘制** / **自动生成**运动路径，轨迹颜色渐变效果 |
+| 💾**持久化存储**      | 修改设置后自动保存至 IndexedDB，刷新不丢失                            |
+| 🖨️**一键下载**      | 点击"保存图片"即可生成截图并下载到本地                                |
 
 ### 批量生成
+
 - 📅 一键生成**多张不同日期、天气、温度**的打卡截图
 - ⏱ 支持设置公里数与配速
 
 ### 用户系统
+
 - 🔐 用户注册 / 登录（JWT 认证）
 - 👤 个人主页
 - 🤝 **好友系统**：
@@ -50,22 +53,23 @@
 
 ## 🛠 技术栈
 
-| 层 | 技术 |
-|----|------|
-| **前端框架** | Vue 3 + Vue Router 4 |
-| **构建工具** | Vite 6 |
+| 层                 | 技术                     |
+| ------------------ | ------------------------ |
+| **前端框架** | Vue 3 + Vue Router 4     |
+| **构建工具** | Vite 6                   |
 | **截图生成** | html2canvas (纯前端渲染) |
-| **地图 API** | 高德地图 AMap |
-| **运行时** | Node.js + Express 5 |
-| **数据库** | MySQL 8 |
-| **认证** | JWT + bcryptjs |
-| **部署** | Vercel (前后端分离) |
+| **地图 API** | 高德地图 AMap            |
+| **运行时**   | Node.js + Express 5      |
+| **数据库**   | MySQL 8                  |
+| **认证**     | JWT + bcryptjs           |
+| **部署**     | Vercel (前后端分离)      |
 
 ---
 
 ## 🚀 快速开始
 
 ### 环境要求
+
 - Node.js >= 18
 - MySQL 8.0+
 
@@ -182,24 +186,26 @@ npm run server   # 启动后端服务
 ## 🔌 API 概览
 
 ### 认证 `/api/auth`
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/auth/register` | 注册新用户 |
-| POST | `/api/auth/login` | 登录，返回 JWT |
-| GET | `/api/auth/me` | 获取当前用户信息 |
-| GET | `/api/health` | 健康检查 |
+
+| 方法 | 路径                   | 说明             |
+| ---- | ---------------------- | ---------------- |
+| POST | `/api/auth/register` | 注册新用户       |
+| POST | `/api/auth/login`    | 登录，返回 JWT   |
+| GET  | `/api/auth/me`       | 获取当前用户信息 |
+| GET  | `/api/health`        | 健康检查         |
 
 ### 好友 `/api/friends`
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/friends/search?q=` | 搜索用户 |
-| GET | `/api/friends/list` | 好友列表 |
-| POST | `/api/friends/request` | 发送好友请求 |
-| PUT | `/api/friends/request/:id` | 接受/拒绝请求 |
-| DELETE | `/api/friends/request/:id` | 撤回已发送请求 |
-| DELETE | `/api/friends/:friendId` | 删除好友 |
-| GET | `/api/friends/requests/incoming` | 收到的好友请求 |
-| GET | `/api/friends/requests/sent` | 已发送的好友请求 |
+
+| 方法   | 路径                               | 说明             |
+| ------ | ---------------------------------- | ---------------- |
+| GET    | `/api/friends/search?q=`         | 搜索用户         |
+| GET    | `/api/friends/list`              | 好友列表         |
+| POST   | `/api/friends/request`           | 发送好友请求     |
+| PUT    | `/api/friends/request/:id`       | 接受/拒绝请求    |
+| DELETE | `/api/friends/request/:id`       | 撤回已发送请求   |
+| DELETE | `/api/friends/:friendId`         | 删除好友         |
+| GET    | `/api/friends/requests/incoming` | 收到的好友请求   |
+| GET    | `/api/friends/requests/sent`     | 已发送的好友请求 |
 
 ---
 
@@ -210,6 +216,7 @@ npm run server   # 启动后端服务
 ```
 
 本项目基于开源社区的前代工作，进行了 **Vue 3 架构重构**：
+
 - 将原本的单页应用重构为 Vue 3 + Vue Router 多页面架构
 - 新增用户认证系统（JWT）
 - 新增好友管理系统
@@ -217,6 +224,7 @@ npm run server   # 启动后端服务
 - 截图生成核心保持为独立页面（`public/keep.html`），通过 iframe 嵌入
 
 **相关链接：**
+
 - [原 Keep 项目（Gitee）](https://gitee.com/fyhb/keep)
 - [原项目 README](https://gitee.com/fyhb/keep/blob/master/README.md)
 

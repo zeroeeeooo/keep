@@ -29,7 +29,7 @@
           <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         请求
-        <span v-if="incomingRequests.length" class="tab-badge">{{ incomingRequests.length }}</span>
+        <span v-if="friends.incomingRequests.length" class="tab-badge">{{ friends.incomingRequests.length }}</span>
       </button>
       <button
         :class="['tab', { active: activeTab === 'list' }]"
@@ -42,7 +42,7 @@
           <path d="M9.5 12.5c0-2.5 1.5-3.5 3.5-3.5s3.5 1 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="translate(-1,-.5)"/>
         </svg>
         好友
-        <span v-if="friends.length" class="tab-badge primary">{{ friends.length }}</span>
+        <span v-if="friends.friends.length" class="tab-badge primary">{{ friends.friends.length }}</span>
       </button>
     </div>
 
@@ -70,11 +70,22 @@
         </div>
 
         <div v-if="searchQuery && !searching" class="search-results">
-          <div v-if="searchResults.length === 0" class="empty-state">
-            <span>未找到匹配的用户</span>
-          </div>
+          <EmptyState
+            v-if="friends.searchResults.length === 0 && searchQuery"
+            title="未找到用户"
+            description="没有匹配的用户名，试试其他关键词"
+          >
+            <template #illustration>
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <circle cx="26" cy="22" r="10" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2"/>
+                <circle cx="44" cy="24" r="8" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2"/>
+                <path d="M8 50c0-6 4.5-9 11-9s11 3 11 9" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+                <path d="M35 47c0-5 3-7 7.5-7s7.5 2 7.5 7" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+              </svg>
+            </template>
+          </EmptyState>
           <div
-            v-for="user in searchResults"
+            v-for="user in friends.searchResults"
             :key="user.id"
             class="user-row"
           >
@@ -108,9 +119,21 @@
       <!-- ===== Requests ===== -->
       <div v-show="activeTab === 'requests'" class="requests-panel">
         <div class="section-title">收到的好友请求</div>
-        <div v-if="incomingRequests.length === 0" class="empty-state">暂无收到的好友请求</div>
+        <EmptyState
+          v-if="friends.incomingRequests.length === 0"
+          title="暂无收到的好友请求"
+          description="当其他用户向你发送好友请求时，会显示在这里"
+        >
+          <template #illustration>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <path d="M20 24h24M32 16v24" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.15" stroke-linecap="round"/>
+              <circle cx="32" cy="28" r="12" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2"/>
+              <path d="M32 22v12M26 28h12" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+            </svg>
+          </template>
+        </EmptyState>
         <div
-          v-for="req in incomingRequests"
+          v-for="req in friends.incomingRequests"
           :key="req.id"
           class="user-row"
         >
@@ -126,9 +149,21 @@
         </div>
 
         <div class="section-title" style="margin-top: 24px;">已发送的请求</div>
-        <div v-if="sentRequests.length === 0" class="empty-state">暂无已发送的请求</div>
+        <EmptyState
+          v-if="friends.sentRequests.length === 0"
+          title="暂无已发送的请求"
+          description="你发送的好友请求会显示在这里"
+        >
+          <template #illustration>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <path d="M24 40l8-16 8 16" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M28 36h8" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+              <path d="M32 18v10" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.15" stroke-linecap="round"/>
+            </svg>
+          </template>
+        </EmptyState>
         <div
-          v-for="req in sentRequests"
+          v-for="req in friends.sentRequests"
           :key="req.id"
           class="user-row"
         >
@@ -143,9 +178,25 @@
 
       <!-- ===== Friend List ===== -->
       <div v-show="activeTab === 'list'" class="list-panel">
-        <div v-if="friends.length === 0" class="empty-state">暂无好友，去搜索添加吧</div>
+        <EmptyState
+          v-if="friends.friends.length === 0"
+          title="还没有好友"
+          description="去搜索页面找到其他用户并添加好友吧"
+          actionText="去搜索"
+          @action="activeTab = 'search'"
+        >
+          <template #illustration>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <circle cx="24" cy="22" r="10" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2"/>
+              <circle cx="44" cy="24" r="8" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2"/>
+              <path d="M6 52c0-6 4.5-9 11-9s11 3 11 9" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+              <path d="M35 49c0-5 3-7 7.5-7s7.5 2 7.5 7" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+              <path d="M40 32l8 8M48 32l-8 8" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.25" stroke-linecap="round"/>
+            </svg>
+          </template>
+        </EmptyState>
         <div
-          v-for="friend in friends"
+          v-for="friend in friends.friends"
           :key="friend.id"
           class="user-row"
         >
@@ -163,39 +214,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import {
-  searchUsers,
-  sendFriendRequest,
-  getFriendList,
-  getIncomingRequests,
-  getSentRequests,
-  handleFriendRequest,
-  removeFriend as apiRemoveFriend,
-  cancelRequest
-} from '../store/auth.js'
+import { ref, onMounted } from 'vue'
+import { useFriendsStore } from '../stores/friendsStore.js'
+import { useToast } from '../composables/useToast.js'
+import EmptyState from '../components/EmptyState.vue'
+
+const { toast, showToast } = useToast()
+const friends = useFriendsStore()
 
 const activeTab = ref('search')
 const searchQuery = ref('')
-const searchResults = ref([])
 const searching = ref(false)
-const friends = ref([])
-const incomingRequests = ref([])
-const sentRequests = ref([])
-
-// ---- Toast ----
-const toast = ref({ show: false, message: '', type: 'info' })
-let toastTimer = null
-
-function showToast(message, type = 'info') {
-  clearTimeout(toastTimer)
-  toast.value = { show: true, message, type }
-  toastTimer = setTimeout(() => {
-    toast.value.show = false
-  }, 2500)
-}
-
-onUnmounted(() => clearTimeout(toastTimer))
 
 // ---- Search ----
 let searchTimer = null
@@ -203,20 +232,14 @@ let searchTimer = null
 function onSearch() {
   clearTimeout(searchTimer)
   if (!searchQuery.value.trim()) {
-    searchResults.value = []
+    friends.searchResults = []
     return
   }
   searching.value = true
   searchTimer = setTimeout(async () => {
-    try {
-      const res = await searchUsers(searchQuery.value.trim())
-      if (res.ok) {
-        searchResults.value = res.data.users
-      } else if (res.message) {
-        showToast(res.message, 'error')
-      }
-    } catch {
-      showToast('无法连接服务器，请确认已启动 npm run server', 'error')
+    const res = await friends.searchUsers(searchQuery.value.trim())
+    if (!res.ok && res.message) {
+      showToast(res.message, 'error')
     }
     searching.value = false
   }, 300)
@@ -229,67 +252,55 @@ function getInitial(user) {
 
 // ---- Add Friend ----
 async function addFriend(user) {
-  try {
-    const res = await sendFriendRequest(user.id)
-    if (res.ok) {
-      showToast(res.message, 'success')
-      user.friend_status = 'sent'
-    } else {
-      showToast(res.message, 'error')
-    }
-  } catch {
-    showToast('网络错误', 'error')
+  const res = await friends.sendFriendRequest(user.id)
+  if (res.ok) {
+    showToast(res.message, 'success')
+    user.friend_status = 'sent'
+  } else {
+    showToast(res.message || '网络错误', 'error')
   }
 }
 
 // ---- Handle Requests ----
 async function acceptRequest(relationId) {
-  try {
-    const res = await handleFriendRequest(relationId, 'accept')
-    if (res.ok) {
-      showToast(res.message, 'success')
-      loadRequests()
-      loadFriends()
-    } else {
-      showToast(res.message, 'error')
-    }
-  } catch {
-    showToast('网络错误', 'error')
+  const res = await friends.handleRequest(relationId, 'accept')
+  if (res.ok) {
+    showToast(res.message, 'success')
+    friends.loadRequests()
+    friends.loadFriends()
+  } else {
+    showToast(res.message || '网络错误', 'error')
   }
 }
 
 async function rejectRequest(relationId) {
-  try {
-    const res = await handleFriendRequest(relationId, 'reject')
-    if (res.ok) {
-      showToast(res.message, 'info')
-      loadRequests()
-    } else {
-      showToast(res.message, 'error')
-    }
-  } catch {
-    showToast('网络错误', 'error')
+  const res = await friends.handleRequest(relationId, 'reject')
+  if (res.ok) {
+    showToast(res.message, 'info')
+    friends.loadRequests()
+  } else {
+    showToast(res.message || '网络错误', 'error')
   }
 }
 
 async function acceptSearchRequest(relationId, user) {
-  const res = await handleFriendRequest(relationId, 'accept')
+  const res = await friends.handleRequest(relationId, 'accept')
   if (res.ok) {
     showToast(res.message, 'success')
     user.friend_status = 'friend'
-    loadRequests()
-    loadFriends()
+    friends.loadRequests()
+    friends.loadFriends()
   } else {
     showToast(res.message, 'error')
   }
 }
 
 async function rejectSearchRequest(relationId, user) {
-  const res = await handleFriendRequest(relationId, 'reject')
+  const res = await friends.handleRequest(relationId, 'reject')
   if (res.ok) {
     showToast(res.message, 'info')
-    searchResults.value = searchResults.value.filter(u => u.id !== user.id)
-    loadRequests()
+    friends.searchResults = friends.searchResults.filter(u => u.id !== user.id)
+    friends.loadRequests()
   } else {
     showToast(res.message, 'error')
   }
@@ -297,34 +308,26 @@ async function rejectSearchRequest(relationId, user) {
 
 // ---- Cancel Sent ----
 async function cancelSent(relationId, user) {
-  try {
-    const res = await cancelRequest(relationId)
-    if (res.ok) {
-      showToast(res.message, 'info')
-      sentRequests.value = sentRequests.value.filter(r => r.relation_id !== relationId)
-      if (user) {
-        user.friend_status = 'none'
-      }
-    } else {
-      showToast(res.message, 'error')
+  const res = await friends.cancelSent(relationId)
+  if (res.ok) {
+    showToast(res.message, 'info')
+    friends.sentRequests = friends.sentRequests.filter(r => r.relation_id !== relationId)
+    if (user) {
+      user.friend_status = 'none'
     }
-  } catch {
-    showToast('网络错误', 'error')
+  } else {
+    showToast(res.message || '网络错误', 'error')
   }
 }
 
 // ---- Remove Friend ----
 async function removeFriend(friend) {
-  try {
-    const res = await apiRemoveFriend(friend.id)
-    if (res.ok) {
-      showToast(res.message, 'info')
-      friends.value = friends.value.filter(f => f.id !== friend.id)
-    } else {
-      showToast(res.message, 'error')
-    }
-  } catch {
-    showToast('网络错误', 'error')
+  const res = await friends.removeFriend(friend.id)
+  if (res.ok) {
+    showToast(res.message, 'info')
+    friends.friends = friends.friends.filter(f => f.id !== friend.id)
+  } else {
+    showToast(res.message || '网络错误', 'error')
   }
 }
 
@@ -338,27 +341,9 @@ function formatDate(dateStr) {
   }
 }
 
-async function loadFriends() {
-  try {
-    const res = await getFriendList()
-    if (res.ok) friends.value = res.data.friends
-  } catch { /* silent */ }
-}
-
-async function loadRequests() {
-  try {
-    const [incoming, sent] = await Promise.all([
-      getIncomingRequests(),
-      getSentRequests()
-    ])
-    if (incoming.ok) incomingRequests.value = incoming.data.requests
-    if (sent.ok) sentRequests.value = sent.data.requests
-  } catch { /* silent */ }
-}
-
 onMounted(() => {
-  loadFriends()
-  loadRequests()
+  friends.loadFriends()
+  friends.loadRequests()
 })
 </script>
 
@@ -367,6 +352,50 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-lg);
+  height: var(--header-height);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.page-header-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--text-md);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+.page-header-back:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.page-header-back .arrow {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.page-header-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.page-header-spacer {
+  width: 90px;
 }
 
 /* Tabs */
@@ -432,7 +461,6 @@ onMounted(() => {
   overflow-y: auto;
 }
 
-/* Search Panel */
 .search-panel,
 .requests-panel,
 .list-panel {
@@ -676,4 +704,27 @@ onMounted(() => {
   margin-bottom: 10px;
   padding: 0 2px;
 }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-inverse);
+}
+.toast-success { background: var(--color-success); }
+.toast-error   { background: var(--color-error); }
+.toast-info    { background: var(--text-primary); }
+
+.toast-enter-active { transition: all 0.25s ease-out; }
+.toast-leave-active { transition: all 0.2s ease-in; }
+.toast-enter-from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+.toast-leave-to   { opacity: 0; transform: translateX(-50%) translateY(-16px); }
 </style>

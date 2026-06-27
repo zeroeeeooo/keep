@@ -1,0 +1,1 @@
+import{L as u,e as n}from"./index-AmBOwpBw.js";function i(){const e=n({show:!1,message:"",type:"info"});let o=null;function t(s,a="info"){clearTimeout(o),e.value={show:!0,message:s,type:a},o=setTimeout(()=>{e.value.show=!1},2500)}return u(()=>clearTimeout(o)),{toast:e,showToast:t}}export{i as u};

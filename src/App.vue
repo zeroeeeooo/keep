@@ -1,39 +1,57 @@
 <template>
   <div id="vue-app">
-    <router-view v-slot="{ Component }">
+    <router-view v-slot="{ Component, route }">
       <keep-alive include="Notes">
-        <component :is="Component" />
+        <transition name="page" mode="out-in">
+          <component :is="Component" :key="route.path" />
+        </transition>
       </keep-alive>
     </router-view>
   </div>
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+
+// 初始化主题（从 localStorage 恢复）
+onMounted(() => {
+  const theme = localStorage.getItem('keep_theme') || 'light'
+  document.documentElement.setAttribute('data-theme', theme)
+})
 </script>
 
 <style>
-/* ===== Design Tokens ===== */
-:root {
-  /* Brand */
+/* ===== Keep 页面字体 ===== */
+@font-face {
+  font-family: 'keeprun';
+  src: url('/DINCond-Bold.otf') format('opentype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'STKAITI';
+  src: url('/STKAITI.TTF') format('truetype');
+  font-display: swap;
+}
+
+/* ===== Design Tokens: Light ===== */
+:root,
+[data-theme="light"] {
   --color-primary: #26c99a;
   --color-primary-hover: #1fb089;
   --color-primary-active: #1a9a75;
   --color-primary-light: #f0faf6;
   --color-primary-border: rgba(38, 201, 154, 0.25);
 
-  /* Surfaces */
   --bg-page: #f5f7fa;
   --bg-card: #ffffff;
   --bg-card-hover: #f8fafc;
   --bg-elevated: #ffffff;
   --bg-input: #fafafa;
 
-  /* Borders */
   --border-light: #e8edf2;
   --border-hover: #d0d7de;
   --border-focus: var(--color-primary);
 
-  /* Text */
   --text-primary: #1a1a2e;
   --text-secondary: #5a6577;
   --text-tertiary: #949eae;
@@ -41,61 +59,69 @@
   --text-inverse: #ffffff;
   --text-link: var(--color-primary);
 
-  /* Feedback */
   --color-success: #26c99a;
   --color-error: #e74c3c;
   --color-warning: #f0a030;
   --color-info: #5b8def;
 
-  /* Spacing */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 40px;
+  --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --space-2xl: 40px;
 
-  /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
   --font-display: 'DINCond-Bold', 'Arial Black', var(--font-sans);
+  --text-xs: 11px; --text-sm: 13px; --text-base: 14px; --text-md: 15px; --text-lg: 18px; --text-xl: 22px; --text-2xl: 26px;
+  --weight-normal: 400; --weight-medium: 500; --weight-semibold: 600; --weight-bold: 700; --weight-black: 900;
 
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-base: 14px;
-  --text-md: 15px;
-  --text-lg: 18px;
-  --text-xl: 22px;
-  --text-2xl: 26px;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-xl: 16px; --radius-full: 50%;
 
-  --weight-normal: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 700;
-  --weight-black: 900;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+  --shadow-primary: 0 4px 16px rgba(38,201,154,0.2);
 
-  /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 16px;
-  --radius-full: 50%;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --shadow-primary: 0 4px 16px rgba(38, 201, 154, 0.2);
-
-  /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s ease;
   --transition-slow: 0.3s ease;
 
-  /* Layout */
   --header-height: 56px;
   --sidebar-width: 240px;
   --content-max-width: 600px;
+}
+
+/* ===== Design Tokens: Dark ===== */
+[data-theme="dark"] {
+  --color-primary: #2ed8a5;
+  --color-primary-hover: #26c99a;
+  --color-primary-active: #1fb089;
+  --color-primary-light: rgba(46, 216, 165, 0.1);
+  --color-primary-border: rgba(46, 216, 165, 0.25);
+
+  --bg-page: #0f1117;
+  --bg-card: #1a1d27;
+  --bg-card-hover: #22263a;
+  --bg-elevated: #22263a;
+  --bg-input: #12141d;
+
+  --border-light: #2a2e3d;
+  --border-hover: #3a3f52;
+  --border-focus: var(--color-primary);
+
+  --text-primary: #e8ecf4;
+  --text-secondary: #98a0b8;
+  --text-tertiary: #6b7394;
+  --text-placeholder: #3f4560;
+  --text-inverse: #0f1117;
+  --text-link: var(--color-primary);
+
+  --color-success: #2ed8a5;
+  --color-error: #f05a5a;
+  --color-warning: #f0a030;
+  --color-info: #6b8cff;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-primary: 0 4px 16px rgba(46,216,165,0.15);
 }
 
 /* ===== Global Reset ===== */
@@ -105,6 +131,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
 }
 
 html {
@@ -118,6 +150,7 @@ body {
   color: var(--text-primary);
   background: var(--bg-page);
   line-height: 1.5;
+  transition: background var(--transition-base), color var(--transition-base);
 }
 
 #vue-app {
@@ -129,14 +162,12 @@ a {
   color: var(--text-link);
   text-decoration: none;
 }
-
 a:hover {
   text-decoration: underline;
 }
 
 /* ===== Shared Component Styles ===== */
 
-/* Card */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
@@ -148,7 +179,6 @@ a:hover {
   box-shadow: var(--shadow-sm);
 }
 
-/* Input */
 .input {
   height: 44px;
   padding: 0 14px;
@@ -170,7 +200,6 @@ a:hover {
   color: var(--text-placeholder);
 }
 
-/* Button - Primary */
 .btn-primary {
   height: 46px;
   padding: 0 24px;
@@ -200,7 +229,6 @@ a:hover {
   opacity: 0.6;
 }
 
-/* Button - Ghost */
 .btn-ghost {
   height: 36px;
   padding: 0 16px;
@@ -223,7 +251,6 @@ a:hover {
   color: var(--text-primary);
 }
 
-/* Button - Danger */
 .btn-danger {
   height: 36px;
   padding: 0 16px;
@@ -241,7 +268,7 @@ a:hover {
 }
 .btn-danger:hover {
   border-color: var(--color-error);
-  background: #fef5f5;
+  background: rgba(240, 90, 90, 0.08);
 }
 
 /* Header bar (shared across sub-pages) */
@@ -358,4 +385,47 @@ a:hover {
   font-size: 32px;
   margin-bottom: 4px;
 }
+
+/* ===== Page Transition ===== */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ===== Skeleton Loading ===== */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.skeleton {
+  background: var(--border-light);
+  border-radius: var(--radius-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.skeleton-text:last-child {
+  width: 60%;
+}
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+}
+.skeleton-card {
+  height: 120px;
+  border-radius: var(--radius-lg);
+}
+
 </style>

@@ -40,11 +40,11 @@
           </div>
           <nav class="sidebar-nav">
             <div class="sidebar-section-title">导航</div>
-            <router-link to="/notes" class="sidebar-item" @click="sidebarOpen = false">
+            <router-link to="/board" class="sidebar-item" @click="sidebarOpen = false">
               <svg class="si" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M4 3h8l3 3v9a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M12 3v4h4" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M6 9h6M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="3" y="4" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M6 8h6M6 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="9" cy="3" r="2" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.3"/>
               </svg>
               <span>随手一记</span>
             </router-link>
@@ -65,6 +65,23 @@
               <span>好友管理</span>
             </router-link>
           </nav>
+
+          <!-- Spacer pushes theme toggle to bottom -->
+          <div class="sidebar-spacer"></div>
+
+          <!-- 暗黑模式切换 -->
+          <div class="sidebar-theme">
+            <button class="theme-btn" @click="toggleTheme">
+              <svg v-if="isDark" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M3 13l1.5-1.5M11.5 4.5L13 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.5 10A6.5 6.5 0 116 2.5a6.5 6.5 0 007.5 7.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+              <span>{{ isDark ? '亮色模式' : '暗黑模式' }}</span>
+            </button>
+          </div>
         </aside>
       </Transition>
 
@@ -88,7 +105,7 @@
             </svg>
           </div>
 
-          <div class="tool-card" @click="$router.push('/notes')" tabindex="0" role="button">
+          <div class="tool-card" @click="$router.push('/board')" tabindex="0" role="button">
             <div class="tool-card-icon">
               <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                 <rect x="4" y="3" width="20" height="22" rx="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
@@ -110,15 +127,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { auth, logout } from '../store/auth.js'
+import { useAuthStore } from '../stores/authStore.js'
 
 const router = useRouter()
+const auth = useAuthStore()
 const sidebarOpen = ref(false)
+const isDark = ref(false)
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light'
+  const next = current === 'dark' ? 'light' : 'dark'
+  document.documentElement.setAttribute('data-theme', next)
+  localStorage.setItem('keep_theme', next)
+  isDark.value = next === 'dark'
+}
+
+onMounted(() => {
+  const theme = localStorage.getItem('keep_theme') || 'light'
+  isDark.value = theme === 'dark'
+})
 
 function handleLogout() {
-  logout()
+  auth.logout()
   router.push('/login')
 }
 </script>
@@ -329,6 +361,41 @@ function handleLogout() {
   flex-shrink: 0;
 }
 
+/* Spacer pushes theme toggle to bottom */
+.sidebar-spacer {
+  flex: 1;
+}
+
+/* Theme toggle at bottom */
+.sidebar-theme {
+  padding: 4px 12px 16px;
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.theme-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+.theme-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+.theme-btn svg {
+  flex-shrink: 0;
+}
+
 /* Sidebar slide transition */
 .sidebar-slide-enter-active,
 .sidebar-slide-leave-active {
@@ -374,15 +441,34 @@ function handleLogout() {
   cursor: pointer;
   transition: all var(--transition-base);
   outline: none;
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+}
+.tool-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-primary);
+  border-radius: 0 3px 3px 0;
+  opacity: 0;
+  transition: opacity var(--transition-base);
 }
 .tool-card:hover {
   border-color: var(--color-primary);
-  box-shadow: var(--shadow-primary);
-  transform: translateX(4px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+.tool-card:hover::before {
+  opacity: 1;
 }
 .tool-card:focus-visible {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-border);
+  outline: none;
 }
 
 .tool-card-icon {

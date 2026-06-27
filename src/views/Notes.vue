@@ -17,7 +17,7 @@
     <div class="notes-body">
       <!-- 发布框 -->
       <div class="compose-card">
-        <div class="compose-avatar">{{ (auth.user?.nickname || auth.user?.username || '?').charAt(0) }}</div>
+        <UserAvatar :name="authorName" size="md" />
         <div class="compose-main">
           <textarea
             v-model="composeContent"
@@ -29,7 +29,9 @@
           <div v-if="previews.length" class="preview-list">
             <div v-for="(p, i) in previews" :key="i" class="preview-item">
               <span class="preview-name">{{ p.name }}</span>
-              <button class="preview-remove" @click="removeFile(i)">✕</button>
+              <button class="preview-remove" @click="removeFile(i)">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
             </div>
           </div>
           <div class="compose-actions">
@@ -54,52 +56,43 @@
         <button :class="['filter-tab', { active: filter === 'mine' }]" @click="filter = 'mine'">我的</button>
       </div>
 
-      <!-- 笔记列表 -->
-      <div v-if="displayNotes.length === 0" class="empty-state">
-        <span class="empty-icon">📝</span>
-        <span>暂无随手一记</span>
-      </div>
+      <div class="notes-list">
+        <EmptyState
+          v-if="displayNotes.length === 0"
+          title="还没有笔记"
+          description="发布你的第一条动态，与好友分享"
+        >
+          <template #illustration>
+            <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+              <rect x="16" y="10" width="40" height="50" rx="5" stroke="var(--color-primary)" stroke-width="1.6" opacity="0.25"/>
+              <path d="M26 24h20M26 32h16M26 40h14" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" opacity="0.2"/>
+              <circle cx="52" cy="20" r="10" fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="1.5"/>
+              <path d="M48 20h8M52 16v8" stroke="var(--color-primary)" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="18" cy="48" r="4" fill="var(--color-primary)" opacity="0.1"/>
+              <circle cx="54" cy="52" r="3" fill="var(--color-primary)" opacity="0.08"/>
+            </svg>
+          </template>
+          <template #action>
+            <button class="empty-cta" @click="focusCompose">写点什么</button>
+          </template>
+        </EmptyState>
 
-      <div v-for="note in displayNotes" :key="note.id" :class="['note-card', { 'note-friend': note.user_id !== auth.userId }]">
-        <div class="note-header">
-          <div :class="['note-avatar', { 'avatar-friend': note.user_id !== auth.userId }]">{{ (note.nickname || note.username).charAt(0) }}</div>
-          <div class="note-meta">
-            <div class="note-author-row">
-              <span class="note-author">{{ note.nickname || note.username }}</span>
-              <span v-if="note.user_id !== auth.userId" class="friend-badge">好友</span>
-            </div>
-            <span class="note-time">{{ formatTime(note.created_at) }}</span>
-          </div>
-          <button
-            v-if="note.user_id === auth.userId"
-            class="note-delete"
-            @click="handleDelete(note.id)"
-            title="删除"
-          >✕</button>
-        </div>
-
-        <p v-if="note.content" class="note-content" v-text="note.content"></p>
-
-        <div v-if="note.files && note.files.length" class="note-files">
-          <a
-            v-for="(f, i) in note.files"
-            :key="i"
-            :href="f"
-            :class="['file-link', { 'file-image': isImage(f) }]"
-            :download="isImage(f) ? undefined : f.split('/').pop()"
-            target="_blank"
-          >
-            <template v-if="isImage(f)">
-              <img :src="f" class="file-img" loading="lazy" @click.prevent="openImage(f)" />
-            </template>
-            <template v-else>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 2h6l4 4v8a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
-                <path d="M9 2v4h4" stroke="currentColor" stroke-width="1.3"/>
-              </svg>
-              <span>{{ f.split('/').pop() }}</span>
-            </template>
-          </a>
+        <div
+          v-for="(note, index) in displayNotes"
+          :key="note.id"
+          class="note-item"
+          :style="{ animationDelay: index * 50 + 'ms' }"
+        >
+          <NotesCard
+            :authorName="note.nickname || note.username"
+            :content="note.content"
+            :files="note.files"
+            :friend="note.user_id !== auth.userId"
+            :showDelete="note.user_id === auth.userId"
+            :createdAt="note.created_at"
+            @delete="handleDelete(note.id)"
+            @preview="openImage"
+          />
         </div>
       </div>
 
@@ -114,21 +107,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onActivated, onUnmounted } from 'vue'
-import { auth } from '../store/auth.js'
-import { createNote, getNotes, getMyNotes, deleteNote } from '../store/notes.js'
+import { ref, computed, onActivated } from 'vue'
+import { useAuthStore } from '../stores/authStore.js'
+import { useNotesStore } from '../stores/notesStore.js'
+import { useToast } from '../composables/useToast.js'
+import EmptyState from '../components/EmptyState.vue'
+import UserAvatar from '../components/UserAvatar.vue'
+import NotesCard from '../components/NotesCard.vue'
 
-// ---- Toast ----
-const toast = reactive({ show: false, message: '', type: 'info' })
-let toastTimer = null
-function showToast(message, type = 'info') {
-  clearTimeout(toastTimer)
-  toast.show = true
-  toast.message = message
-  toast.type = type
-  toastTimer = setTimeout(() => { toast.show = false }, 2500)
-}
-onUnmounted(() => clearTimeout(toastTimer))
+const { toast, showToast } = useToast()
+const auth = useAuthStore()
+const notes = useNotesStore()
+
+const authorName = computed(() => auth.user?.nickname || auth.user?.username || '?')
 
 // ---- Compose ----
 const composeContent = ref('')
@@ -164,69 +155,35 @@ function removeFile(i) {
 async function submitNote() {
   if (!canPost.value || posting.value) return
   posting.value = true
-  try {
-    const res = await createNote({
-      content: composeContent.value.trim(),
-      files: selectedFiles.value
-    })
-    if (res.ok) {
-      showToast('发布成功', 'success')
-      // 立即追加到列表顶部
-      const note = res.data.note
-      allNotes.value.unshift(note)
-      myNotes.value.unshift(note)
-      // 清空输入
-      composeContent.value = ''
-      selectedFiles.value = []
-      previews.value = []
-      // 后台刷新完整数据
-      loadNotes()
-      loadMyNotes()
-    } else {
-      showToast(res.message, 'error')
-    }
-  } catch {
-    showToast('网络错误', 'error')
+  const res = await notes.createNote({
+    content: composeContent.value.trim(),
+    files: selectedFiles.value
+  })
+  if (res.ok) {
+    showToast('发布成功', 'success')
+    composeContent.value = ''
+    selectedFiles.value = []
+    previews.value = []
+  } else {
+    showToast(res.message || '网络错误', 'error')
   }
   posting.value = false
 }
 
 // ---- Notes list ----
 const filter = ref('all')
-const allNotes = ref([])
-const myNotes = ref([])
 
 const displayNotes = computed(() => {
-  return filter.value === 'mine' ? myNotes.value : allNotes.value
+  return filter.value === 'mine' ? notes.myNotes : notes.allNotes
 })
-
-async function loadNotes() {
-  try {
-    const res = await getNotes()
-    if (res.ok) allNotes.value = res.data.notes
-  } catch (e) { console.error('loadNotes error:', e) }
-}
-
-async function loadMyNotes() {
-  try {
-    const res = await getMyNotes()
-    if (res.ok) myNotes.value = res.data.notes
-  } catch (e) { console.error('loadMyNotes error:', e) }
-}
 
 // ---- Delete ----
 async function handleDelete(noteId) {
-  try {
-    const res = await deleteNote(noteId)
-    if (res.ok) {
-      showToast('已删除', 'info')
-      allNotes.value = allNotes.value.filter(n => n.id !== noteId)
-      myNotes.value = myNotes.value.filter(n => n.id !== noteId)
-    } else {
-      showToast(res.message, 'error')
-    }
-  } catch {
-    showToast('网络错误', 'error')
+  const res = await notes.deleteNote(noteId)
+  if (res.ok) {
+    showToast('已删除', 'info')
+  } else {
+    showToast(res.message || '网络错误', 'error')
   }
 }
 
@@ -234,25 +191,14 @@ async function handleDelete(noteId) {
 const imagePreview = ref(null)
 function openImage(src) { imagePreview.value = src }
 
-function isImage(path) {
-  return /\.(jpg|jpeg|png|gif|webp)$/i.test(path)
-}
-
-function formatTime(dateStr) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  const now = new Date()
-  const diff = now - d
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
-  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
-  if (diff < 172800000) return '昨天'
-  return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+function focusCompose() {
+  const textarea = document.querySelector('.compose-input')
+  if (textarea) textarea.focus()
 }
 
 onActivated(() => {
-  loadNotes()
-  loadMyNotes()
+  notes.loadNotes()
+  notes.loadMyNotes()
 })
 </script>
 
@@ -274,6 +220,49 @@ onActivated(() => {
   gap: 12px;
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-lg);
+  height: var(--header-height);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.page-header-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--text-md);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+.page-header-back:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.page-header-back .arrow {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.page-header-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.page-header-spacer {
+  width: 90px;
+}
+
 /* ===== Compose Card ===== */
 .compose-card {
   display: flex;
@@ -282,20 +271,6 @@ onActivated(() => {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-}
-
-.compose-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-primary), #1a9a75);
-  color: var(--text-inverse);
-  font-size: 14px;
-  font-weight: var(--weight-bold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 
 .compose-main {
@@ -432,162 +407,26 @@ onActivated(() => {
   color: var(--text-secondary);
 }
 
-/* ===== Note Card ===== */
-.note-card {
-  padding: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  transition: border-color var(--transition-fast);
-}
-.note-card:hover {
-  border-color: var(--border-hover);
+/* ===== Note List Animation ===== */
+.note-item {
+  animation: noteFadeIn 0.3s ease-out both;
 }
 
-.note-friend {
-  background: rgba(91, 141, 239, 0.03);
-  border-color: rgba(91, 141, 239, 0.12);
-}
-.note-friend:hover {
-  border-color: rgba(91, 141, 239, 0.25);
-}
-
-.note-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+@keyframes noteFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.note-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-primary), #1a9a75);
-  color: var(--text-inverse);
-  font-size: 13px;
-  font-weight: var(--weight-bold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.avatar-friend {
-  background: linear-gradient(135deg, #5b8def, #7c6cf0);
-}
-
-.note-meta {
-  flex: 1;
+.notes-list {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-}
-
-.note-author-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.note-author {
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  color: var(--text-primary);
-}
-
-.friend-badge {
-  font-size: 10px;
-  font-weight: var(--weight-semibold);
-  color: #5b8def;
-  background: rgba(91, 141, 239, 0.1);
-  padding: 1px 7px;
-  border-radius: 10px;
-  line-height: 1.4;
-  letter-spacing: 0.3px;
-}
-
-.note-time {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
-.note-delete {
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-.note-delete:hover {
-  background: #fef5f5;
-  color: var(--color-error);
-}
-
-.note-content {
-  font-size: var(--text-base);
-  color: var(--text-primary);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* ===== Files ===== */
-.note-files {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.file-link {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
-
-.file-image {
-  width: 120px;
-  height: 120px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1px solid var(--border-light);
-  transition: border-color var(--transition-fast);
-}
-.file-image:hover {
-  border-color: var(--color-primary);
-}
-
-.file-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  cursor: pointer;
-}
-
-.file-link:not(.file-image) {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-}
-.file-link:not(.file-image):hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  gap: 12px;
 }
 
 /* ===== Image Preview Overlay ===== */
@@ -637,4 +476,22 @@ onActivated(() => {
 .fade-leave-active { transition: opacity 0.2s ease; }
 .fade-enter-from,
 .fade-leave-to { opacity: 0; }
+
+.empty-cta {
+  margin-top: 20px;
+  height: 40px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition-fast);
+}
+.empty-cta:hover {
+  background: var(--color-primary-hover);
+}
 </style>

@@ -1,19 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/authStore.js'
+
+// 首页、登录、注册、Keep 首屏加载（用户最可能先访问的页面）
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
-import Keep from '../views/Keep.vue'
-import Profile from '../views/Profile.vue'
-import Friends from '../views/Friends.vue'
-import Notes from '../views/Notes.vue'
-import { auth } from '../store/auth.js'
+
+// 其他页面懒加载（用户可能访问频率较低）
+const Keep = () => import('../views/Keep.vue')
+const Profile = () => import('../views/Profile.vue')
+const Friends = () => import('../views/Friends.vue')
+const Notes = () => import('../views/Notes.vue')
+const CorkBoard = () => import('../views/CorkBoard.vue')
+const BoardDetail = () => import('../views/BoardDetail.vue')
 
 const routes = [
   {
     path: '/',
     redirect: () => {
-      // 已登录去首页，未登录去 KEEPro（游客模式）
-      return auth.loggedIn ? '/home' : '/keepimage'
+      const hasToken = !!localStorage.getItem('keep_auth_token')
+      return hasToken ? '/home' : '/keepimage'
     }
   },
   {
@@ -38,7 +44,7 @@ const routes = [
     path: '/keepimage',
     name: 'Keep',
     component: Keep,
-    meta: { guest: true } // 游客可访问
+    meta: { guest: true }
   },
   {
     path: '/profile',
@@ -57,6 +63,18 @@ const routes = [
     name: 'Notes',
     component: Notes,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/board',
+    name: 'CorkBoard',
+    component: CorkBoard,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/board/:id',
+    name: 'BoardDetail',
+    component: BoardDetail,
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -66,12 +84,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
   if (to.meta.requiresAuth && !auth.loggedIn) {
-    // 需要登录但未登录 → 跳转到 KEEPro（游客模式入口）
     next({ name: 'Keep' })
   } else if (to.meta.guest && auth.loggedIn && to.name !== 'Keep') {
-    // 已登录用户访问登录/注册页 → 跳转首页
-    // 游客页中保持 Keep 访问不受限
     next({ name: 'Home' })
   } else {
     next()

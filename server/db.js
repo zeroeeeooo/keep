@@ -75,6 +75,38 @@ export async function initDB() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `)
 
+  // 话题表
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS topics (
+      id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+      user_id     BIGINT       NOT NULL,
+      content     TEXT,
+      files       JSON         DEFAULT NULL,
+      tags        JSON         DEFAULT NULL,
+      visibility  VARCHAR(20)  DEFAULT 'public',
+      reply_count INT          DEFAULT 0,
+      like_count  INT          DEFAULT 0,
+      view_count  INT          DEFAULT 0,
+      created_at  VARCHAR(30)  NOT NULL,
+      last_reply_at VARCHAR(30) DEFAULT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `)
+
+  // 回复表
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS replies (
+      id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+      topic_id   BIGINT       NOT NULL,
+      user_id    BIGINT       NOT NULL,
+      content    TEXT,
+      files      JSON         DEFAULT NULL,
+      created_at VARCHAR(30)  NOT NULL,
+      FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id)  REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `)
+
   const [rows] = await pool.execute(
     'SELECT id FROM users WHERE username = ?', ['admin']
   )
@@ -299,4 +331,114 @@ export async function deleteNote(noteId, userId) {
     [noteId, userId]
   )
   return result.affectedRows > 0
+}
+
+// ==================== 话题系统 ====================
+
+export async function createTopic(userId, content, files = []) {
+  if (!files) files = []
+  const filesJson = files.length ? JSON.stringify(files) : '[]'
+  const now = new Date().toISOString()
+  const [result] = await pool.query(
+    'INSERT INTO topics (user_id, content, files, reply_count, created_at) VALUES (?, ?, ?, 0, ?)',
+    [userId, content || '', filesJson, now]
+  )
+  return getTopicById(result.insertId)
+}
+
+export async function getTopics(userId, page = 1, pageSize = 50) {
+  const offset = ((parseInt(page) || 1) - 1) * (parseInt(pageSize) || 50)
+  const limit = parseInt(pageSize) || 50
+  const [rows] = await pool.query(
+    `SELECT t.*, u.nickname, u.username
+     FROM topics t
+     JOIN users u ON t.user_id = u.id
+     ORDER BY t.created_at DESC
+     LIMIT ? OFFSET ?`,
+    [limit, offset]
+  )
+  return rows.map(r => ({ ...r, files: safeJson(r.files) }))
+}
+
+export async function getMyTopics(userId, page = 1, pageSize = 50) {
+  const offset = ((parseInt(page) || 1) - 1) * (parseInt(pageSize) || 50)
+  const limit = parseInt(pageSize) || 50
+  const [rows] = await pool.query(
+    `SELECT t.*, u.nickname, u.username
+     FROM topics t
+     JOIN users u ON t.user_id = u.id
+     WHERE t.user_id = ?
+     ORDER BY t.created_at DESC
+     LIMIT ? OFFSET ?`,
+    [userId, limit, offset]
+  )
+  return rows.map(r => ({ ...r, files: safeJson(r.files) }))
+}
+
+export async function getTopicById(topicId) {
+  const [rows] = await pool.query(
+    `SELECT t.*, u.nickname, u.username
+     FROM topics t
+     JOIN users u ON t.user_id = u.id
+     WHERE t.id = ?`,
+    [topicId]
+  )
+  if (rows.length === 0) return null
+  return { ...rows[0], files: safeJson(rows[0].files) }
+}
+
+export async function deleteTopic(topicId) {
+  await pool.query('DELETE FROM topics WHERE id = ?', [topicId])
+  await pool.query('DELETE FROM replies WHERE topic_id = ?', [topicId])
+}
+
+export async function createReply(topicId, userId, content, files = []) {
+  if (!files) files = []
+  const filesJson = files.length ? JSON.stringify(files) : '[]'
+  const now = new Date().toISOString()
+  const [result] = await pool.query(
+    'INSERT INTO replies (topic_id, user_id, content, files, created_at) VALUES (?, ?, ?, ?, ?)',
+    [topicId, userId, content || '', filesJson, now]
+  )
+  await pool.query(
+    'UPDATE topics SET reply_count = reply_count + 1, last_reply_at = ? WHERE id = ?',
+    [now, topicId]
+  )
+  const [rows] = await pool.query(
+    `SELECT r.*, u.nickname, u.username
+     FROM replies r
+     JOIN users u ON r.user_id = u.id
+     WHERE r.id = ?`,
+    [result.insertId]
+  )
+  return { ...rows[0], files: safeJson(rows[0].files) }
+}
+
+export async function getReplies(topicId, page = 1, pageSize = 50) {
+  const offset = ((parseInt(page) || 1) - 1) * (parseInt(pageSize) || 50)
+  const limit = parseInt(pageSize) || 50
+  const [rows] = await pool.query(
+    `SELECT r.*, u.nickname, u.username
+     FROM replies r
+     JOIN users u ON r.user_id = u.id
+     WHERE r.topic_id = ?
+     ORDER BY r.created_at ASC
+     LIMIT ? OFFSET ?`,
+    [topicId, limit, offset]
+  )
+  return rows.map(r => ({ ...r, files: safeJson(r.files) }))
+}
+
+export async function deleteReply(replyId) {
+  const [rows] = await pool.query('SELECT topic_id FROM replies WHERE id = ?', [replyId])
+  if (rows.length > 0) {
+    await pool.query('DELETE FROM replies WHERE id = ?', [replyId])
+    await pool.query('UPDATE topics SET reply_count = GREATEST(0, reply_count - 1) WHERE id = ?', [rows[0].topic_id])
+  }
+}
+
+function safeJson(str) {
+  if (!str) return []
+  if (Array.isArray(str)) return str
+  try { return JSON.parse(str) } catch { return [] }
 }

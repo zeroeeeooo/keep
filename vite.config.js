@@ -6,6 +6,9 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+     allowedHosts: [
+      '.loca.lt'  // 允许所有 loca.lt 的子域名
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
