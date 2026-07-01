@@ -98,8 +98,8 @@
               </svg>
               <input type="file" multiple accept="image/*,.pdf" style="display:none" @change="onFileSelect" />
             </label>
-            <button class="sheet-submit" :disabled="!newContent.trim()" @click="submitTopic">
-              📌 贴上墙
+            <button class="sheet-submit" :disabled="!newContent.trim() || submitting" @click="submitTopic">
+              {{ submitting ? '提交中…' : '📌 贴上墙' }}
             </button>
           </div>
         </div>
@@ -130,6 +130,7 @@ const newContent = ref('')
 const newFiles = ref([])
 const textareaRef = ref(null)
 const imagePreview = ref(null)
+const submitting = ref(false)
 
 function openImage(src) { imagePreview.value = src }
 
@@ -163,11 +164,13 @@ function onFileSelect(e) {
 }
 
 async function submitTopic() {
-  if (!newContent.value.trim()) return
+  if (!newContent.value.trim() || submitting.value) return
+  submitting.value = true
   const res = await topicStore.createTopic({
     content: newContent.value.trim(),
     files: newFiles.value
   })
+  submitting.value = false
   if (res.ok) {
     showToast('已贴在墙上！', 'success')
     showCreateSheet.value = false

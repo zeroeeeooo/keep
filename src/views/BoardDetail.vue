@@ -105,7 +105,7 @@
           @input="autoResize"
           @keydown.enter.exact="sendReply"
         ></textarea>
-        <button class="reply-send" :disabled="!canSend" @click="sendReply">
+        <button class="reply-send" :disabled="!canSend || submitting" @click="sendReply">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -141,6 +141,7 @@ const loading = ref(false)
 const selectedFiles = ref([])
 const previews = ref([])
 const imagePreview = ref(null)
+const submitting = ref(false)
 const replyCount = computed(() => replies.value.length)
 const canSend = computed(() => replyContent.value.trim() || selectedFiles.value.length)
 
@@ -212,11 +213,13 @@ function removeFile(i) {
 }
 
 async function sendReply() {
-  if (!canSend.value || !topic.value) return
+  if (!canSend.value || !topic.value || submitting.value) return
+  submitting.value = true
   const res = await topicStore.createReply(topic.value.id, {
     content: replyContent.value.trim(),
     files: selectedFiles.value
   })
+  submitting.value = false
   if (res.ok) {
     replyContent.value = ''
     selectedFiles.value = []
