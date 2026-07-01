@@ -4,6 +4,7 @@
  * 生产环境必须通过环境变量设置所有敏感值；
  * 开发环境提供安全的本地回退（不包含公开的硬编码字符串）。
  */
+import 'dotenv/config'
 import crypto from 'crypto'
 
 const IS_PROD = process.env.NODE_ENV === 'production' || !!process.env.RENDER
