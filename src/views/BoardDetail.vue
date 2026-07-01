@@ -82,7 +82,21 @@
 
     <!-- 底部输入栏 -->
     <div class="reply-input-bar">
+      <div v-if="previews.length" class="reply-preview-strip">
+        <div v-for="(p, i) in previews" :key="i" class="reply-preview-item">
+          <span class="reply-preview-name">{{ p.name }}</span>
+          <button class="reply-preview-remove" @click="removeFile(i)">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
       <div class="reply-input-wrap">
+        <label class="reply-file-btn">
+          <input type="file" multiple accept="image/*,.pdf" @change="onFileSelect" />
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </label>
         <textarea
           v-model="replyContent"
           class="reply-input"
@@ -91,7 +105,7 @@
           @input="autoResize"
           @keydown.enter.exact="sendReply"
         ></textarea>
-        <button class="reply-send" :disabled="!replyContent.trim()" @click="sendReply">
+        <button class="reply-send" :disabled="!canSend" @click="sendReply">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -117,7 +131,10 @@ const topic = ref(null)
 const replies = ref([])
 const replyContent = ref('')
 const loading = ref(false)
+const selectedFiles = ref([])
+const previews = ref([])
 const replyCount = computed(() => replies.value.length)
+const canSend = computed(() => replyContent.value.trim() || selectedFiles.value.length)
 
 /** 标准化文件对象数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
 function normalizeFiles(files) {
@@ -166,17 +183,40 @@ function autoResize(e) {
   e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
 }
 
+function onFileSelect(e) {
+  const files = Array.from(e.target.files)
+  for (const f of files) {
+    if (f.size > 20 * 1024 * 1024) {
+      alert(f.name + ' 超过 20MB 限制')
+      continue
+    }
+    selectedFiles.value.push(f)
+    previews.value.push({ name: f.name })
+  }
+  e.target.value = ''
+}
+
+function removeFile(i) {
+  selectedFiles.value.splice(i, 1)
+  previews.value.splice(i, 1)
+}
+
 async function sendReply() {
-  if (!replyContent.value.trim() || !topic.value) return
+  if (!canSend.value || !topic.value) return
   const res = await topicStore.createReply(topic.value.id, {
-    content: replyContent.value.trim()
+    content: replyContent.value.trim(),
+    files: selectedFiles.value
   })
   if (res.ok) {
     replyContent.value = ''
+    selectedFiles.value = []
+    previews.value = []
     await topicStore.loadReplies(topic.value.id)
     replies.value = topicStore.replies
     // 刷新话题列表的回复数
     topicStore.loadTopics()
+  } else {
+    alert(res.message || '回复失败')
   }
 }
 
@@ -444,10 +484,10 @@ async function handleDelete() {
   margin-top: 8px;
 }
 .reply-img {
-  width: 80px;
-  height: 80px;
+  width: 140px;
+  height: 140px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 .reply-pdf-link {
   display: inline-flex;
@@ -497,13 +537,65 @@ async function handleDelete() {
   background: rgba(196, 154, 108, 0.95);
   backdrop-filter: blur(8px);
 }
+.reply-preview-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.reply-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 6px;
+  font-size: 11px;
+  color: #3a2a1a;
+  max-width: 160px;
+}
+.reply-preview-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reply-preview-remove {
+  border: none;
+  background: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  flex-shrink: 0;
+}
+.reply-preview-remove:hover { color: #e74c3c; }
+
 .reply-input-wrap {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
   background: rgba(255,255,255,0.9);
   border-radius: 12px;
-  padding: 6px 6px 6px 14px;
+  padding: 6px 6px 6px 4px;
+}
+.reply-file-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #8a7a5a;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.reply-file-btn:hover {
+  background: rgba(0,0,0,0.06);
+  color: var(--color-primary);
+}
+.reply-file-btn input {
+  display: none;
 }
 .reply-input {
   flex: 1;
@@ -544,6 +636,17 @@ async function handleDelete() {
 }
 [data-theme="dark"] .reply-input-wrap {
   background: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .reply-preview-item {
+  background: rgba(255,255,255,0.12);
+  color: #e8dcc8;
+}
+[data-theme="dark"] .reply-file-btn {
+  color: #a89880;
+}
+[data-theme="dark"] .reply-file-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #e8dcc8;
 }
 [data-theme="dark"] .reply-input {
   color: #e8dcc8;

@@ -155,14 +155,15 @@ router.get('/:id/replies', authMiddleware, async (req, res) => {
 router.post('/:id/replies', authMiddleware, uploadMiddleware, async (req, res) => {
   try {
     const { content } = req.body
-    if (!content || !content.trim()) {
+    const hasFiles = req.files && req.files.length > 0
+    if ((!content || !content.trim()) && !hasFiles) {
       return res.json({ ok: false, message: '内容不能为空' })
     }
 
     // 压缩图片（PDF 跳过）
     const files = await processUploadedFiles(req.files)
 
-    const reply = await createReply(req.params.id, req.user.userId, content.trim(), files)
+    const reply = await createReply(req.params.id, req.user.userId, (content || '').trim(), files)
     res.json({ ok: true, data: { reply }, message: '回复成功' })
   } catch (err) {
     console.error('createReply error:', err)
