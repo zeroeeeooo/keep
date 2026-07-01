@@ -20,3 +20,10 @@ server/uploads/
 .agents/
 .codewhale/
 .kilo/
+
+# Claude Code 工作区
+.claude/worktrees/
+.claude/memory/
+
+# 本地文档
+相关文档/
