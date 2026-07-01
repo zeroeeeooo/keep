@@ -13,6 +13,11 @@ node_modules/
 # 构建产物
 dist/
 
+# 部署配置（本地部署不需要）
+vercel.json
+render.yaml
+.env.production
+
 # 用户上传文件（图片/PDF）
 server/uploads/
 
@@ -20,12 +25,16 @@ server/uploads/
 .agents/
 .codewhale/
 .kilo/
+skills-lock.json
 
 # Claude Code 工作区
 .claude/
 
 # 本地文档
 相关文档/
+
+# 旧版独立应用（Vue 版已不依赖）
+public/
 
 # Windows 错误创建的目录
 %SystemDrive%/
