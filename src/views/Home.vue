@@ -40,29 +40,12 @@
           </div>
           <nav class="sidebar-nav">
             <div class="sidebar-section-title">导航</div>
-            <router-link to="/board" class="sidebar-item" @click="sidebarOpen = false">
-              <svg class="si" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <rect x="3" y="4" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M6 8h6M6 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <circle cx="9" cy="3" r="2" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.3"/>
-              </svg>
-              <span>随手一记</span>
-            </router-link>
             <router-link to="/profile" class="sidebar-item" @click="sidebarOpen = false">
               <svg class="si" width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="6" r="3.5" stroke="currentColor" stroke-width="1.5"/>
                 <path d="M2.5 16c0-3.5 2.5-6 6.5-6s6.5 2.5 6.5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
               <span>个人主页</span>
-            </router-link>
-            <router-link to="/friends" class="sidebar-item" @click="sidebarOpen = false">
-              <svg class="si" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <circle cx="7" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="13" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M1.5 16c0-3.3 2.2-5 5.5-5s5.5 1.7 5.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M11 14c0-2.5 1.8-3.8 4-3.8s4 1.3 4 3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="translate(-2,-1)"/>
-              </svg>
-              <span>好友管理</span>
             </router-link>
           </nav>
 
