@@ -35,22 +35,6 @@
         <h2 class="profile-nickname">{{ displayName }}</h2>
         <p class="profile-username">@{{ auth.user?.username }}</p>
         <p class="profile-bio">{{ userBio }}</p>
-        <div class="profile-meta">
-          <span class="profile-meta-item">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <rect x="1.5" y="2.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
-              <path d="M1.5 5.5h11" stroke="currentColor" stroke-width="1.2"/>
-            </svg>
-            {{ formattedDate }} 加入
-          </span>
-          <span class="profile-meta-divider"></span>
-          <span class="profile-meta-item">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1.5L9 5.5l4.5.5L10 9l1 4.5L7 11l-4 2.5L4 9 .5 6 5 5.5 7 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-            </svg>
-            {{ daysJoined }} 天
-          </span>
-        </div>
       </div>
 
       <!-- ===== Stats Grid ===== -->
@@ -141,49 +125,6 @@
           </template>
         </EmptyState>
       </div>
-
-      <!-- ===== Quick Actions ===== -->
-      <div class="actions-grid stagger-item">
-        <router-link to="/friends" class="action-card">
-          <div class="action-icon-box" style="background: linear-gradient(135deg, #5b8def, #7c6cf0)">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="7" cy="5.5" r="3" stroke="#fff" stroke-width="1.5"/>
-              <circle cx="13" cy="5.5" r="2.5" stroke="#fff" stroke-width="1.5"/>
-              <path d="M1.5 16c0-3.3 2.2-5 5.5-5s5.5 1.7 5.5 5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M11 14c0-2.5 1.8-3.8 4-3.8s4 1.3 4 3.8" stroke="#fff" stroke-width="1.5" stroke-linecap="round" transform="translate(-2,-1)"/>
-            </svg>
-          </div>
-          <span class="action-label">好友管理</span>
-        </router-link>
-        <router-link to="/notes" class="action-card">
-          <div class="action-icon-box" style="background: linear-gradient(135deg, #26c99a, #1a9a75)">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 3.5h12a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1v-11a1 1 0 011-1z" stroke="#fff" stroke-width="1.5"/>
-              <path d="M6.5 7h7M6.5 10h7M6.5 13h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <span class="action-label">我的笔记</span>
-        </router-link>
-        <router-link to="/corkboard" class="action-card">
-          <div class="action-icon-box" style="background: linear-gradient(135deg, #f0a030, #e88a20)">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="3" y="5" width="14" height="12" rx="1.5" stroke="#fff" stroke-width="1.5"/>
-              <path d="M10 3v2M7 3v2M13 3v2" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M6 10l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span class="action-label">话题广场</span>
-        </router-link>
-        <router-link to="/home" class="action-card">
-          <div class="action-icon-box" style="background: linear-gradient(135deg, #e74c3c, #c0392b)">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 10l7-7 7 7" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M5 8.5V16a1 1 0 001 1h3v-4h2v4h3a1 1 0 001-1V8.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span class="action-label">回到首页</span>
-        </router-link>
-      </div>
     </div>
   </div>
 </template>
@@ -204,9 +145,6 @@ const topicStore = useTopicStore()
 
 // ---- Data ----
 const friendCount = ref(0)
-const incomingCount = ref(0)
-const sentCount = ref(0)
-const noteCount = ref(0)
 const topicCount = ref(0)
 
 const statRefs = {}
@@ -216,37 +154,13 @@ const friendsList = computed(() => friends.friends)
 const displayName = computed(() => auth.user?.nickname || auth.user?.username || '用户')
 
 const userBio = computed(() => {
-  // 没有独立 bio 字段，用 nickname + username 组合占位，或留空
-  // 后续可改为后端返回的 bio
   return ''
-})
-
-const daysJoined = computed(() => {
-  if (!auth.user?.created_at) return 0
-  const joined = new Date(auth.user.created_at)
-  const now = new Date()
-  return Math.floor((now - joined) / (1000 * 60 * 60 * 24)) + 1
-})
-
-const formattedDate = computed(() => {
-  if (!auth.user?.created_at) return '未知'
-  try {
-    return new Date(auth.user.created_at).toLocaleDateString('zh-CN', {
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    })
-  } catch {
-    return auth.user.created_at
-  }
 })
 
 // ---- Stats ----
 const stats = computed(() => [
   { key: 'friends', label: '好友', icon: friendsIcon, iconBg: 'linear-gradient(135deg, #5b8def, #7c6cf0)', value: friendCount.value },
-  { key: 'pending', label: '待处理', icon: pendingIcon, iconBg: 'linear-gradient(135deg, #f0a030, #e88a20)', value: incomingCount.value },
-  { key: 'notes', label: '笔记', icon: notesIcon, iconBg: 'linear-gradient(135deg, #26c99a, #1a9a75)', value: noteCount.value },
   { key: 'topics', label: '话题', icon: topicsIcon, iconBg: 'linear-gradient(135deg, #e74c3c, #c0392b)', value: topicCount.value },
-  { key: 'days', label: '天数', icon: daysIcon, iconBg: 'linear-gradient(135deg, #a855f7, #7c3aed)', value: daysJoined.value },
-  { key: 'sent', label: '已发送', icon: sentIcon, iconBg: 'linear-gradient(135deg, #06b6d4, #0891b2)', value: sentCount.value },
 ])
 
 // ---- Recent Activity ----
@@ -270,7 +184,7 @@ const recentActivity = computed(() => {
       type: 'topic',
       text: t.content ? t.content.slice(0, 60) + (t.content.length > 60 ? '…' : '') : '一个话题',
       timeAgo: timeAgo(t.created_at),
-      link: '/corkboard',
+      link: `/board/${t.id}`,
       sortTime: new Date(t.created_at).getTime()
     })
   }
@@ -300,11 +214,7 @@ function timeAgo(dateStr) {
 function animateCounters() {
   const targets = [
     { key: 'friends', value: friendCount.value },
-    { key: 'pending', value: incomingCount.value },
-    { key: 'notes', value: noteCount.value },
     { key: 'topics', value: topicCount.value },
-    { key: 'days', value: daysJoined.value },
-    { key: 'sent', value: sentCount.value },
   ]
   targets.forEach(({ key, value }) => {
     const el = statRefs[key]
@@ -352,9 +262,6 @@ async function loadStats() {
     topicStore.loadMyTopics(),
   ])
   friendCount.value = friends.friends.length
-  incomingCount.value = friends.incomingRequests.length
-  sentCount.value = friends.sentRequests.length
-  noteCount.value = notesStore.myNotes.length
   topicCount.value = topicStore.myTopics.length
 
   await nextTick()
@@ -366,11 +273,7 @@ onMounted(loadStats)
 
 // ---- SVG Icons ----
 const friendsIcon = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="5.5" r="3" stroke="#fff" stroke-width="1.5"/><circle cx="13" cy="5.5" r="2.5" stroke="#fff" stroke-width="1.5"/><path d="M1.5 16c0-3.3 2.2-5 5.5-5s5.5 1.7 5.5 5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M11 14c0-2.5 1.8-3.8 4-3.8s4 1.3 4 3.8" stroke="#fff" stroke-width="1.5" stroke-linecap="round" transform="translate(-2,-1)"/></svg>'
-const pendingIcon = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#fff" stroke-width="1.5"/><path d="M10 6v4l3 2" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>'
-const notesIcon = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 3.5h12a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1v-11a1 1 0 011-1z" stroke="#fff" stroke-width="1.5"/><path d="M6.5 7h7M6.5 10h7M6.5 13h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>'
 const topicsIcon = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="12" rx="1.5" stroke="#fff" stroke-width="1.5"/><path d="M10 3v2M7 3v2M13 3v2" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M6 10l3 3 5-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-const daysIcon = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.5 5L18 7.5l-4 3.5 1 5.5L10 13l-5 3.5 1-5.5-4-3.5L7.5 7 10 2z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>'
-const sentIcon = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10l5 5 9-9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 const noteIcon = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 3.5h12a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1v-11a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 7h7M6.5 10h7M6.5 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
 const topicIcon = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M7 3v2M13 3v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6 10l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 </script>
@@ -583,27 +486,6 @@ const topicIcon = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><
   min-height: 1em;
 }
 
-.profile-meta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-}
-
-.profile-meta-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.profile-meta-divider {
-  width: 1px;
-  height: 12px;
-  background: var(--border-light);
-}
-
 /* ===== Stats Grid ===== */
 .stats-grid {
   display: grid;
@@ -812,53 +694,6 @@ const topicIcon = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><
   color: var(--color-primary);
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
-}
-
-/* ===== Quick Actions ===== */
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.action-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 20px 12px 16px;
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  text-decoration: none;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-.action-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-hover);
-}
-.action-card:active {
-  transform: translateY(0);
-}
-
-.action-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-label {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  font-weight: var(--weight-medium);
-}
-.action-card:hover .action-label {
-  color: var(--text-primary);
 }
 
 /* ===== Entry Animation ===== */
