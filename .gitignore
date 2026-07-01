@@ -26,3 +26,6 @@ server/uploads/
 
 # 本地文档
 相关文档/
+
+# Windows 错误创建的目录
+%SystemDrive%/
