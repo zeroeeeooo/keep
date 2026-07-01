@@ -381,7 +381,7 @@ async function handleDelete() {
   font-size: 14px;
   line-height: 1.6;
   color: #5a4a2a;
-  font-family: 'KaiTi', 'STKaiti', '楷体', cursive;
+  font-family: var(--font-sans);
   margin: 0;
   white-space: pre-wrap;
 }

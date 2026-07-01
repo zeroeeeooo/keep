@@ -179,7 +179,7 @@ function isImageUrl(path) {
   font-size: 14px;
   line-height: 1.6;
   word-break: break-word;
-  font-family: 'KaiTi', 'STKaiti', '楷体', cursive;
+  font-family: var(--font-sans);
   margin: 0;
 }
 

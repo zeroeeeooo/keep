@@ -115,7 +115,7 @@
   border-radius: 8px;
   overflow: hidden;
   font-size: 0.85em;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
 }
 .md-body th,
 .md-body td {
@@ -208,8 +208,7 @@
 }
 
 /* ===================================================================
-   针对便利贴场景的特殊适配 — 楷体 + 浅色/彩色背景
-   主题色表头改为深色文字 (与黄色便利贴背景区分)
+   针对便利贴场景的特殊适配 — 浅色/彩色背景
    =================================================================== */
 .note-yellow .md-body th,
 .note-blue .md-body th,

@@ -412,7 +412,7 @@ async function submitTopic() {
   border: none;
   background: transparent;
   font-size: 15px;
-  font-family: 'KaiTi', 'STKaiti', '楷体', cursive;
+  font-family: var(--font-sans);
   color: #5a4a2a;
   outline: none;
   resize: none;
