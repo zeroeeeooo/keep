@@ -15,9 +15,10 @@
         <span class="sticky-time">{{ formattedTime }}</span>
       </div>
     </div>
-    <div class="sticky-content md-body" v-html="renderedContent"></div>
-    <div v-if="normalizedFiles.length" class="sticky-files">
-      <template v-for="(f, i) in normalizedFiles" :key="i">
+    <div class="sticky-content md-body" v-html="renderedPreview"></div>
+    <div v-if="isTruncated" class="sticky-expand-hint">... 展开查看全部</div>
+    <div v-if="previewFiles.length" class="sticky-files">
+      <template v-for="(f, i) in previewFiles" :key="i">
         <img v-if="isImageUrl(f.url)" :src="f.url" class="sticky-file-img" loading="lazy" @click.stop.prevent="$emit('preview', f.url)" />
         <a v-else :href="f.url" class="sticky-pdf-link" target="_blank" :download="f.name" @click.stop>
           <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
@@ -27,6 +28,7 @@
           <span class="sticky-pdf-name">{{ f.name }}</span>
         </a>
       </template>
+      <div v-if="extraFilesCount > 0" class="sticky-more-files">+{{ extraFilesCount }} 个附件</div>
     </div>
     <div class="sticky-footer">
       <span v-if="tags && tags.length" class="sticky-tag">{{ tags[0] }}</span>
@@ -58,6 +60,34 @@ const props = defineProps({
 defineEmits(['click', 'preview'])
 
 const renderedContent = computed(() => renderMarkdown(props.content))
+
+/** 纯文本预览（截取前 80 字符） */
+const previewText = computed(() => {
+  const text = props.content || ''
+  return text.length > 80 ? text.slice(0, 80).replace(/\s+\S*$/, '') + '…' : text
+})
+const isTruncated = computed(() => (props.content || '').length > 80)
+const renderedPreview = computed(() => renderMarkdown(previewText.value))
+
+/** 预览文件：图片最多 3 张，PDF 全部显示 */
+const previewFiles = computed(() => {
+  let imageCount = 0
+  const result = []
+  for (const f of normalizedFiles.value) {
+    if (isImageUrl(f.url)) {
+      if (imageCount >= 3) continue
+      imageCount++
+      result.push(f)
+    } else {
+      result.push(f)
+    }
+  }
+  return result
+})
+const extraFilesCount = computed(() => {
+  const images = normalizedFiles.value.filter(f => isImageUrl(f.url))
+  return Math.max(0, images.length - 3)
+})
 
 /** 标准化文件数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
 const normalizedFiles = computed(() => {
@@ -201,6 +231,21 @@ function isImageUrl(path) {
 .sticky-file-img:hover {
   transform: scale(1.05);
   opacity: 0.85;
+}
+
+.sticky-more-files {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: inherit;
+  opacity: 0.6;
+  padding: 4px 0;
+  text-align: center;
+}
+
+.sticky-expand-hint {
+  font-size: 12px;
+  opacity: 0.5;
+  margin-top: -4px;
 }
 
 .sticky-pdf-link {
