@@ -7,6 +7,9 @@
 
 let _cachedTrackData = null
 
+import startImgUrl from '../../../assets/images/start.png'
+import endImgUrl from '../../../assets/images/end.png'
+
 export async function loadLocalTrackData() {
   if (_cachedTrackData) return _cachedTrackData
   try {
@@ -127,8 +130,8 @@ export async function drawTrackOnBg(bgSrc, options = {}) {
   const endDy = Math.sin(angle) * endDist * 0.6
 
   // 加载起点终点图标
-  const startImg = await loadImage('images/start.png')
-  const endImg = await loadImage('images/end.png')
+  const startImg = await loadImage(startImgUrl)
+  const endImg = await loadImage(endImgUrl)
 
   // 绘制轨迹
   ctx.lineJoin = 'round'

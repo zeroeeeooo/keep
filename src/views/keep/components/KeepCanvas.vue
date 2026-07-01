@@ -34,6 +34,8 @@
 <script setup>
 import { ref, computed, nextTick, watch, onMounted } from 'vue'
 
+import guiOverlay from '../../../assets/images/1.png'
+
 const props = defineProps({
   form: { type: Object, required: true },
   milesDisplay: { type: String, default: '0.00' },
@@ -52,7 +54,7 @@ const props = defineProps({
 const bgImgRef = ref(null)
 const portraitRef = ref(null)
 
-const guiImgSrc = computed(() => 'images/1.png?_=' + Date.now())
+const guiImgSrc = computed(() => guiOverlay + '?_=' + Date.now())
 
 const bgWidth = 360
 const bgHeight = 719

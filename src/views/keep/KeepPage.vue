@@ -95,6 +95,16 @@ import KeepActions from './components/KeepActions.vue'
 import KeepBatchPanel from './components/KeepBatchPanel.vue'
 import KeepPreview from './components/KeepPreview.vue'
 
+// 图片导入 (Vite 静态资源，自动添加内容哈希)
+import defaultPortrait from '../../assets/images/default_portrait.png'
+import weather1 from '../../assets/images/weather1.png'
+import weather2 from '../../assets/images/weather2.png'
+import weather3 from '../../assets/images/weather3.png'
+import bg1_1 from '../../assets/images/bg1_1.png'
+import bg1_empty2 from '../../assets/images/bg1_empty2.png'
+import bg2_empty from '../../assets/images/bg2_empty.png'
+import bg3_empty from '../../assets/images/bg3_empty.png'
+
 const auth = useAuthStore()
 const loggedIn = computed(() => auth.loggedIn)
 
@@ -105,16 +115,16 @@ const showPreview = ref(false)
 const previewDataUrl = ref('')
 
 // 图片源 (Vue 响应式绑定会自动更新 KeepCanvas)
-const portraitSrc = ref('images/default_portrait.png')
+const portraitSrc = ref(defaultPortrait)
 const bgSrc = ref('')         // 当前显示的背景（可能包含轨迹）
 const originalBgSrc = ref('') // 纯背景（不含轨迹），用于重绘轨迹时作为底图
-const weatherIcon = ref('images/weather1.png')
+const weatherIcon = ref(weather1)
 
 // 预设背景映射 (bg = 显示用, empty = 绘制轨迹用底图)
 const bgPresets = {
-  '南体育场': { bg: 'images/bg1_1.png', empty: 'images/bg1_empty2.png' },
-  '军工操场': { bg: 'images/bg2_empty.png', empty: 'images/bg2_empty.png' },
-  '北体育场': { bg: 'images/bg3_empty.png', empty: 'images/bg3_empty.png' }
+  '南体育场': { bg: bg1_1, empty: bg1_empty2 },
+  '军工操场': { bg: bg2_empty, empty: bg2_empty },
+  '北体育场': { bg: bg3_empty, empty: bg3_empty }
 }
 const selectedBgPreset = ref('南体育场')
 
@@ -130,8 +140,8 @@ onMounted(async () => {
 })
 
 function initWeatherIcon() {
-  const map = { '晴': 'images/weather1.png', '多云': 'images/weather2.png', '阴天': 'images/weather3.png' }
-  weatherIcon.value = map[keep.form.weatherType] || 'images/weather1.png'
+  const map = { '晴': weather1, '多云': weather2, '阴天': weather3 }
+  weatherIcon.value = map[keep.form.weatherType] || weather1
 }
 
 // 天气类型变化时自动更新图标
@@ -156,7 +166,7 @@ async function handlePortraitSelect(file) {
 }
 
 function handleResetPortrait() {
-  portraitSrc.value = 'images/default_portrait.png'
+  portraitSrc.value = defaultPortrait
   keep.images.portrait = ''
 }
 
@@ -211,9 +221,9 @@ function loadAMapWeather(apiKey) {
       .then(data => {
         if (data.status !== '1' || !data.lives || !data.lives.length) throw new Error('天气数据格式错误')
         const info = data.lives[0]
-        let img = 'images/weather3.png'
-        if (info.weather === '晴') img = 'images/weather1.png'
-        else if (info.weather === '多云') img = 'images/weather2.png'
+        let img = weather3
+        if (info.weather === '晴') img = weather1
+        else if (info.weather === '多云') img = weather2
         resolve({ temperature: info.temperature, humidity: info.humidity, weather: info.weather, weatherImage: img })
       })
       .catch(reject)
@@ -270,7 +280,7 @@ async function handleSaveSettings() {
 // ---- 重置 ----
 async function handleReset() {
   await keep.resetAllData()
-  portraitSrc.value = 'images/default_portrait.png'
+  portraitSrc.value = defaultPortrait
   const preset = bgPresets[selectedBgPreset.value]
   const cleanBg = preset?.bg || ''
   originalBgSrc.value = cleanBg
@@ -403,8 +413,8 @@ async function handleBatchGenerate(params) {
     } else {
       keep.form.weatherType = weatherOptions[Math.floor(Math.random() * weatherOptions.length)]
     }
-    const wMap = { '晴': 'images/weather1.png', '多云': 'images/weather2.png', '阴天': 'images/weather3.png' }
-    weatherIcon.value = wMap[keep.form.weatherType] || 'images/weather1.png'
+    const wMap = { '晴': weather1, '多云': weather2, '阴天': weather3 }
+    weatherIcon.value = wMap[keep.form.weatherType] || weather1
 
     // 温度
     const tMin = tempMin ?? -5

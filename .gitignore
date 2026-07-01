@@ -33,8 +33,10 @@ skills-lock.json
 # 本地文档
 相关文档/
 
-# 旧版独立应用（Vue 版已不依赖）
-public/
+# 旧版独立应用文件（keep.html、旧版 css/js — Vue 版不再依赖）
+public/keep.html
+public/css/
+public/js/
 
 # Windows 错误创建的目录
 %SystemDrive%/
