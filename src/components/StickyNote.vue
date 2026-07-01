@@ -193,11 +193,12 @@ function isImageUrl(path) {
   object-fit: cover;
   border-radius: 2px;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: transform 0.2s, opacity 0.2s;
   background: rgba(0,0,0,0.05);
 }
 .sticky-file-img:hover {
-  opacity: 0.8;
+  transform: scale(1.05);
+  opacity: 0.85;
 }
 
 .sticky-pdf-link {

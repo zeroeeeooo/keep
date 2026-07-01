@@ -26,7 +26,7 @@
           <p class="pinned-content">{{ topic.content }}</p>
           <div v-if="topicFiles.length" class="pinned-files">
             <template v-for="(f, i) in topicFiles" :key="i">
-              <img v-if="isImageUrl(f.url)" :src="f.url" class="pinned-img" loading="lazy" />
+              <img v-if="isImageUrl(f.url)" :src="f.url" class="pinned-img" loading="lazy" @click="openImage(f.url)" />
               <a v-else :href="f.url" class="pinned-pdf-link" target="_blank" :download="f.name">
                 <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
                   <path d="M4 3h7l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
@@ -60,7 +60,7 @@
             <p class="reply-text">{{ reply.content }}</p>
             <div v-if="reply.files && reply.files.length" class="reply-files">
               <template v-for="(f, fi) in normalizeFiles(reply.files)" :key="fi">
-                <img v-if="isImageUrl(f.url)" :src="f.url" class="reply-img" loading="lazy" />
+                <img v-if="isImageUrl(f.url)" :src="f.url" class="reply-img" loading="lazy" @click="openImage(f.url)" />
                 <a v-else :href="f.url" class="reply-pdf-link" target="_blank" :download="f.name">
                   <svg width="12" height="12" viewBox="0 0 18 18" fill="none">
                     <path d="M4 3h7l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
@@ -112,6 +112,13 @@
         </button>
       </div>
     </div>
+
+    <!-- 图片预览弹窗 -->
+    <Transition name="fade">
+      <div v-if="imagePreview" class="detail-image-overlay" @click="imagePreview = null">
+        <img :src="imagePreview" class="detail-image-full" />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -133,8 +140,11 @@ const replyContent = ref('')
 const loading = ref(false)
 const selectedFiles = ref([])
 const previews = ref([])
+const imagePreview = ref(null)
 const replyCount = computed(() => replies.value.length)
 const canSend = computed(() => replyContent.value.trim() || selectedFiles.value.length)
+
+function openImage(src) { imagePreview.value = src }
 
 /** 标准化文件对象数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
 function normalizeFiles(files) {
@@ -376,6 +386,12 @@ async function handleDelete() {
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.pinned-img:hover {
+  transform: scale(1.05);
+  opacity: 0.85;
 }
 .pinned-pdf-link {
   display: inline-flex;
@@ -488,6 +504,12 @@ async function handleDelete() {
   height: 140px;
   object-fit: cover;
   border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.reply-img:hover {
+  transform: scale(1.06);
+  opacity: 0.85;
 }
 .reply-pdf-link {
   display: inline-flex;
@@ -654,4 +676,27 @@ async function handleDelete() {
 [data-theme="dark"] .reply-input::placeholder {
   color: #8a7a6a;
 }
+
+/* ===== Image Preview Overlay ===== */
+.detail-image-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: pointer;
+}
+.detail-image-full {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.fade-enter-active,
+.fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from,
+.fade-leave-to { opacity: 0; }
 </style>

@@ -30,6 +30,7 @@
           :createdAt="topic.created_at"
           :rotation="topic.rotation || '0deg'"
           @click="openTopic(topic)"
+          @preview="openImage"
         />
       </div>
 
@@ -53,6 +54,13 @@
         </div>
       </div>
     </div>
+
+    <!-- 图片预览弹窗 -->
+    <Transition name="fade">
+      <div v-if="imagePreview" class="cork-image-overlay" @click="imagePreview = null">
+        <img :src="imagePreview" class="cork-image-full" />
+      </div>
+    </Transition>
 
     <!-- 创建话题浮动按钮 -->
     <button class="cork-fab" @click="showCreateSheet = true" title="创建新话题">
@@ -121,6 +129,9 @@ const showCreateSheet = ref(false)
 const newContent = ref('')
 const newFiles = ref([])
 const textareaRef = ref(null)
+const imagePreview = ref(null)
+
+function openImage(src) { imagePreview.value = src }
 
 const displayTopics = computed(() => {
   return filter.value === 'mine' ? topicStore.myTopics : topicStore.allTopics
@@ -488,4 +499,28 @@ async function submitTopic() {
 .sheet-enter-active .create-sheet { transform: translateY(0); }
 .sheet-enter-from .create-sheet { transform: translateY(100%); }
 .sheet-leave-to .create-sheet { transform: translateY(100%); }
+
+/* ===== Image Preview Overlay ===== */
+.cork-image-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: pointer;
+}
+.cork-image-full {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.fade-enter-active,
+.fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from,
+.fade-leave-to { opacity: 0; }
 </style>
