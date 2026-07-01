@@ -17,7 +17,7 @@
       <div v-if="topic" class="topic-pinned">
         <div class="pinned-sticky">
           <div class="pinned-header">
-            <UserAvatar :name="topic.nickname || topic.username" size="md" />
+            <UserAvatar :name="topic.nickname || topic.username" size="md" :src="topic.avatar" />
             <div class="pinned-info">
               <span class="pinned-author">{{ topic.nickname || topic.username }}</span>
               <span class="pinned-time">{{ formatTime(topic.created_at) }}</span>
@@ -53,7 +53,7 @@
         >
           <div class="reply-inner">
             <div class="reply-author">
-              <UserAvatar :name="reply.nickname || reply.username" size="sm" />
+              <UserAvatar :name="reply.nickname || reply.username" size="sm" :src="reply.avatar" />
               <span class="reply-name">{{ reply.nickname || reply.username }}</span>
               <span class="reply-time">{{ formatTime(reply.created_at) }}</span>
             </div>

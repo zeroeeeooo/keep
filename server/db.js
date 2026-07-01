@@ -181,7 +181,7 @@ export async function createUser(username, password, nickname) {
 // 搜索用户（返回带 friend_status 的完整信息，一次 JOIN 查询）
 export async function searchUsers(keyword, currentUserId) {
   const [rows] = await pool.execute(
-    `SELECT u.id, u.username, u.nickname, u.created_at,
+    `SELECT u.id, u.username, u.nickname, u.avatar, u.created_at,
             f.id AS relation_id,
             CASE
               WHEN f.status = 'accepted' THEN 'friend'
@@ -252,7 +252,7 @@ export async function removeFriend(userId, friendId) {
 // 获取好友列表（双向 accepted）
 export async function getFriendList(userId) {
   const [rows] = await pool.execute(
-    `SELECT u.id, u.username, u.nickname, u.created_at,
+    `SELECT u.id, u.username, u.nickname, u.avatar, u.created_at,
             f.id AS relation_id, f.created_at AS friend_since
      FROM friends f
      JOIN users u ON (CASE WHEN f.user_id = ? THEN f.friend_id ELSE f.user_id END = u.id)
@@ -265,7 +265,7 @@ export async function getFriendList(userId) {
 // 获取收到的好友请求（pending，对方发来的）
 export async function getPendingRequests(userId) {
   const [rows] = await pool.execute(
-    `SELECT u.id, u.username, u.nickname, u.created_at,
+    `SELECT u.id, u.username, u.nickname, u.avatar, u.created_at,
             f.id AS relation_id, f.created_at AS requested_at
      FROM friends f
      JOIN users u ON f.user_id = u.id
@@ -278,7 +278,7 @@ export async function getPendingRequests(userId) {
 // 获取已发送的好友请求
 export async function getSentRequests(userId) {
   const [rows] = await pool.execute(
-    `SELECT u.id, u.username, u.nickname, u.created_at,
+    `SELECT u.id, u.username, u.nickname, u.avatar, u.created_at,
             f.id AS relation_id, f.created_at AS requested_at
      FROM friends f
      JOIN users u ON f.friend_id = u.id
@@ -307,7 +307,7 @@ export async function getNotes(userId, page = 1, pageSize = 50) {
   const offs = Number(offset)
   const [rows] = await pool.query(
     `SELECT n.id, n.user_id, n.content, n.files, n.created_at, n.updated_at,
-            u.username, u.nickname
+            u.username, u.nickname, u.avatar
      FROM notes n
      JOIN users u ON n.user_id = u.id
      WHERE n.user_id = ?
@@ -330,7 +330,7 @@ export async function getMyNotes(userId, page = 1, pageSize = 50) {
   const offs = Number(offset)
   const [rows] = await pool.query(
     `SELECT n.id, n.user_id, n.content, n.files, n.created_at, n.updated_at,
-            u.username, u.nickname
+            u.username, u.nickname, u.avatar
      FROM notes n
      JOIN users u ON n.user_id = u.id
      WHERE n.user_id = ?
@@ -367,7 +367,7 @@ export async function getTopics(userId, page = 1, pageSize = 50) {
   const offset = ((parseInt(page) || 1) - 1) * (parseInt(pageSize) || 50)
   const limit = parseInt(pageSize) || 50
   const [rows] = await pool.query(
-    `SELECT t.*, u.nickname, u.username
+    `SELECT t.*, u.nickname, u.username, u.avatar
      FROM topics t
      JOIN users u ON t.user_id = u.id
      ORDER BY t.created_at DESC
@@ -381,7 +381,7 @@ export async function getMyTopics(userId, page = 1, pageSize = 50) {
   const offset = ((parseInt(page) || 1) - 1) * (parseInt(pageSize) || 50)
   const limit = parseInt(pageSize) || 50
   const [rows] = await pool.query(
-    `SELECT t.*, u.nickname, u.username
+    `SELECT t.*, u.nickname, u.username, u.avatar
      FROM topics t
      JOIN users u ON t.user_id = u.id
      WHERE t.user_id = ?
@@ -394,7 +394,7 @@ export async function getMyTopics(userId, page = 1, pageSize = 50) {
 
 export async function getTopicById(topicId) {
   const [rows] = await pool.query(
-    `SELECT t.*, u.nickname, u.username
+    `SELECT t.*, u.nickname, u.username, u.avatar
      FROM topics t
      JOIN users u ON t.user_id = u.id
      WHERE t.id = ?`,
@@ -422,7 +422,7 @@ export async function createReply(topicId, userId, content, files = []) {
     [now, topicId]
   )
   const [rows] = await pool.query(
-    `SELECT r.*, u.nickname, u.username
+    `SELECT r.*, u.nickname, u.username, u.avatar
      FROM replies r
      JOIN users u ON r.user_id = u.id
      WHERE r.id = ?`,
@@ -435,7 +435,7 @@ export async function getReplies(topicId, page = 1, pageSize = 50) {
   const offset = ((parseInt(page) || 1) - 1) * (parseInt(pageSize) || 50)
   const limit = parseInt(pageSize) || 50
   const [rows] = await pool.query(
-    `SELECT r.*, u.nickname, u.username
+    `SELECT r.*, u.nickname, u.username, u.avatar
      FROM replies r
      JOIN users u ON r.user_id = u.id
      WHERE r.topic_id = ?

@@ -9,7 +9,7 @@
   >
     <PushPin :color="pinColor" :size="18" :rotate="rotation" />
     <div class="sticky-header">
-      <UserAvatar :name="authorName" size="sm" :friend="isFriend" />
+      <UserAvatar :name="authorName" size="sm" :src="avatarSrc" :friend="isFriend" />
       <div class="sticky-meta">
         <span class="sticky-author">{{ authorName }}</span>
         <span class="sticky-time">{{ formattedTime }}</span>
@@ -46,6 +46,7 @@ import { renderMarkdown } from '../utils/markdown.js'
 
 const props = defineProps({
   authorName: { type: String, default: '?' },
+  avatarSrc: { type: String, default: null },
   content: { type: String, default: '' },
   files: { type: Array, default: () => [] },
   tags: { type: Array, default: () => [] },

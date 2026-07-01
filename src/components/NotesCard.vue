@@ -2,7 +2,7 @@
   <div :class="['note-card', { 'note-card--friend': friend }]">
     <!-- Top row: avatar + name + time -->
     <div class="note-top">
-      <UserAvatar :name="authorName" size="md" :friend="friend" />
+      <UserAvatar :name="authorName" size="md" :src="avatarSrc" :friend="friend" />
       <div class="note-info">
         <span class="note-name">{{ authorName }}</span>
         <span class="note-time">{{ formattedTime }}</span>
@@ -59,6 +59,7 @@ import { renderMarkdown } from '../utils/markdown.js'
 
 const props = defineProps({
   authorName: { type: String, default: '?' },
+  avatarSrc: { type: String, default: null },
   content: { type: String, default: '' },
   files: { type: Array, default: () => [] },
   friend: { type: Boolean, default: false },

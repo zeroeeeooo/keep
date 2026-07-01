@@ -104,7 +104,7 @@
           :key="friend.id"
           class="friend-row"
         >
-          <UserAvatar :name="friend.nickname || friend.username" size="sm" :friend="true" />
+          <UserAvatar :name="friend.nickname || friend.username" :src="friend.avatar" size="sm" :friend="true" />
           <span class="friend-name">{{ friend.nickname || friend.username }}</span>
         </div>
         <router-link

@@ -89,7 +89,7 @@
             :key="user.id"
             class="user-row"
           >
-            <div class="user-avatar">{{ getInitial(user) }}</div>
+            <UserAvatar :name="user.nickname || user.username" :src="user.avatar" size="md" />
             <div class="user-info">
               <div class="user-name">{{ user.nickname || user.username }}</div>
               <div class="user-tag">@{{ user.username }}</div>
@@ -137,7 +137,7 @@
           :key="req.id"
           class="user-row"
         >
-          <div class="user-avatar">{{ getInitial(req) }}</div>
+          <UserAvatar :name="req.nickname || req.username" :src="req.avatar" size="md" />
           <div class="user-info">
             <div class="user-name">{{ req.nickname || req.username }}</div>
             <div class="user-tag">@{{ req.username }}</div>
@@ -167,7 +167,7 @@
           :key="req.id"
           class="user-row"
         >
-          <div class="user-avatar">{{ getInitial(req) }}</div>
+          <UserAvatar :name="req.nickname || req.username" :src="req.avatar" size="md" />
           <div class="user-info">
             <div class="user-name">{{ req.nickname || req.username }}</div>
             <div class="user-tag">@{{ req.username }}</div>
@@ -200,7 +200,7 @@
           :key="friend.id"
           class="user-row"
         >
-          <div class="user-avatar">{{ getInitial(friend) }}</div>
+          <UserAvatar :name="friend.nickname || friend.username" :src="friend.avatar" size="md" />
           <div class="user-info">
             <div class="user-name">{{ friend.nickname || friend.username }}</div>
             <div class="user-tag">@{{ friend.username }}</div>
@@ -217,6 +217,7 @@
 import { ref, onMounted } from 'vue'
 import { useFriendsStore } from '../stores/friendsStore.js'
 import { useToast } from '../composables/useToast.js'
+import UserAvatar from '../components/UserAvatar.vue'
 import EmptyState from '../components/EmptyState.vue'
 
 const { toast, showToast } = useToast()

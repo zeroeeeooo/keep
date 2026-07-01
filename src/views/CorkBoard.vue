@@ -21,6 +21,7 @@
           v-for="topic in displayTopics"
           :key="topic.id"
           :authorName="topic.nickname || topic.username"
+          :avatarSrc="topic.avatar"
           :content="topic.content"
           :tags="topic.tags || []"
           :isFriend="topic.user_id !== auth.userId"

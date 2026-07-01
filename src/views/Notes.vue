@@ -85,6 +85,7 @@
         >
           <NotesCard
             :authorName="note.nickname || note.username"
+            :avatarSrc="note.avatar"
             :content="note.content"
             :files="note.files"
             :friend="note.user_id !== auth.userId"
