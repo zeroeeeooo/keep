@@ -20,7 +20,9 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   // Aiven / 远程 MySQL 需要 SSL
-  ...(IS_PROD ? { ssl: {} } : {})
+  ...(IS_PROD ? { ssl: {
+    rejectUnauthorized: false 
+  } } : {})
 })
 
 async function ensureDatabase() {
@@ -30,7 +32,9 @@ async function ensureDatabase() {
     user: config.DB_USER,
     password: config.DB_PASSWORD,
     charset: 'utf8mb4',
-    ...(IS_PROD ? { ssl: {} } : {})
+    ...(IS_PROD ? { ssl: {
+      rejectUnauthorized: false 
+    } } : {})
   })
   await conn.execute(
     `CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
