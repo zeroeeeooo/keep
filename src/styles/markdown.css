@@ -1,0 +1,234 @@
+/* ===================================================================
+   Markdown 渲染统一样式 (Global)
+   通过 main.js 全局导入，作用于所有 .md-body 容器
+   =================================================================== */
+
+/* ---- 基础排版 ---- */
+.md-body {
+  line-height: 1.7;
+  word-break: break-word;
+  font-size: inherit;
+}
+
+/* ---- 段落 ---- */
+.md-body p {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+}
+.md-body p:last-child { margin-bottom: 0; }
+
+/* ---- 标题 ---- */
+.md-body h1,
+.md-body h2,
+.md-body h3,
+.md-body h4,
+.md-body h5,
+.md-body h6 {
+  margin: 16px 0 8px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+.md-body h1 { font-size: 1.35em; }
+.md-body h2 { font-size: 1.2em; }
+.md-body h3 { font-size: 1.1em; }
+.md-body h4 { font-size: 1.05em; }
+
+/* ---- 链接 ---- */
+.md-body a {
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.md-body a:hover {
+  border-bottom-color: var(--color-primary);
+}
+
+/* ---- 加粗 / 斜体 ---- */
+.md-body strong { font-weight: 700; }
+.md-body em { font-style: italic; }
+
+/* ---- 行内代码 ---- */
+.md-body code {
+  font-family: var(--font-mono), 'Consolas', 'Monaco', 'Courier New', monospace;
+  background: rgba(0,0,0,0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  word-break: break-word;
+}
+
+/* ---- 代码块 ---- */
+.md-body pre {
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  padding: 14px 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+.md-body pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.85em;
+  color: #333;
+}
+
+/* ---- 引用 ---- */
+.md-body blockquote {
+  border-left: 4px solid var(--color-primary);
+  margin: 12px 0;
+  padding: 8px 16px;
+  background: var(--color-primary-light);
+  border-radius: 0 8px 8px 0;
+  color: var(--text-secondary);
+}
+.md-body blockquote p:last-child { margin-bottom: 0; }
+
+/* ---- 无序/有序列表 ---- */
+.md-body ul,
+.md-body ol {
+  margin: 6px 0;
+  padding-left: 24px;
+}
+.md-body ul { list-style: disc; }
+.md-body ol { list-style: decimal; }
+.md-body li { margin-bottom: 4px; }
+.md-body li:last-child { margin-bottom: 0; }
+.md-body li > ul,
+.md-body li > ol { margin: 2px 0; }
+
+/* ---- 任务列表 (GFM) ---- */
+.md-body input[type="checkbox"] {
+  margin-right: 6px;
+  transform: translateY(1px);
+}
+
+/* ---- 表格 ---- */
+.md-body table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin: 12px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.85em;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.md-body th,
+.md-body td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+.md-body th {
+  background: #26c99a;
+  color: #fff;
+  font-weight: 600;
+}
+.md-body td {
+  background: var(--bg-card);
+}
+.md-body tr:nth-child(even) td {
+  background: var(--bg-card-hover);
+}
+.md-body tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---- 图片 ---- */
+.md-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin: 12px 0;
+  display: block;
+  transition: box-shadow 0.2s;
+}
+.md-body img:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* ---- 分割线 ---- */
+.md-body hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-light), transparent);
+  margin: 20px 0;
+}
+
+/* ---- 内联 HTML 小标签 ---- */
+.md-body sub,
+.md-body sup { font-size: 0.75em; }
+
+.md-body del { text-decoration: line-through; }
+
+.md-body mark {
+  background: #fff3cd;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+/* ===================================================================
+   Dark Mode
+   =================================================================== */
+[data-theme="dark"] .md-body code {
+  background: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .md-body pre {
+  background: #1e1e1e;
+  border-color: #333;
+}
+[data-theme="dark"] .md-body pre code {
+  color: #d4d4d4;
+}
+[data-theme="dark"] .md-body blockquote {
+  background: rgba(46,216,165,0.08);
+  border-left-color: var(--color-primary);
+}
+[data-theme="dark"] .md-body th {
+  background: #2ed8a5;
+  color: #0f1117;
+}
+[data-theme="dark"] .md-body td {
+  background: var(--bg-card);
+}
+[data-theme="dark"] .md-body tr:nth-child(even) td {
+  background: var(--bg-card-hover);
+}
+[data-theme="dark"] .md-body img {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .md-body mark {
+  background: #5a4a00;
+  color: #fff;
+}
+
+/* ===================================================================
+   针对便利贴场景的特殊适配 — 楷体 + 浅色/彩色背景
+   主题色表头改为深色文字 (与黄色便利贴背景区分)
+   =================================================================== */
+.note-yellow .md-body th,
+.note-blue .md-body th,
+.note-pink .md-body th {
+  color: #fff;
+}
+.note-yellow .md-body td { background: rgba(255,255,255,0.5); }
+.note-blue .md-body td  { background: rgba(255,255,255,0.3); }
+.note-pink .md-body td  { background: rgba(255,255,255,0.3); }
+
+/* 便利贴暗色模式表格适配 */
+[data-theme="dark"] .note-yellow .md-body th,
+[data-theme="dark"] .note-blue .md-body th,
+[data-theme="dark"] .note-pink .md-body th {
+  background: #2ed8a5;
+  color: #0f1117;
+}
+[data-theme="dark"] .note-yellow .md-body td,
+[data-theme="dark"] .note-blue .md-body td,
+[data-theme="dark"] .note-pink .md-body td {
+  background: rgba(0,0,0,0.2);
+}
