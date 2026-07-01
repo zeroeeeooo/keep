@@ -383,10 +383,10 @@ async function handleDelete() {
   color: #5a4a2a;
   font-family: 'KaiTi', 'STKaiti', '楷体', cursive;
   margin: 0;
-  white-space: pre-wrap;
 }
 .pinned-content p {
   margin: 0 0 6px;
+  white-space: pre-wrap;
 }
 .pinned-content p:last-child {
   margin-bottom: 0;
@@ -404,6 +404,7 @@ async function handleDelete() {
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.9em;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 .pinned-content pre {
   background: rgba(0,0,0,0.06);
@@ -443,6 +444,26 @@ async function handleDelete() {
   border: none;
   border-top: 1px solid rgba(90,74,42,0.2);
   margin: 10px 0;
+}
+.pinned-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 0.85em;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.pinned-content th,
+.pinned-content td {
+  border: 1px solid rgba(90,74,42,0.25);
+  padding: 5px 8px;
+  text-align: left;
+}
+.pinned-content th {
+  background: rgba(90,74,42,0.08);
+  font-weight: 600;
+}
+.pinned-content td {
+  background: rgba(255,255,255,0.35);
 }
 .pinned-files {
   display: grid;
@@ -487,7 +508,9 @@ async function handleDelete() {
 [data-theme="dark"] .pinned-content h2,
 [data-theme="dark"] .pinned-content h3,
 [data-theme="dark"] .pinned-content h4,
-[data-theme="dark"] .pinned-content li { color: #fef68a; }
+[data-theme="dark"] .pinned-content li,
+[data-theme="dark"] .pinned-content th,
+[data-theme="dark"] .pinned-content td { color: #fef68a; }
 [data-theme="dark"] .pinned-content a { color: #fef68a; }
 [data-theme="dark"] .pinned-content code { background: rgba(255,255,255,0.1); }
 [data-theme="dark"] .pinned-content pre { background: rgba(0,0,0,0.2); }
@@ -496,6 +519,16 @@ async function handleDelete() {
   background: rgba(0,0,0,0.1);
 }
 [data-theme="dark"] .pinned-content hr { border-top-color: rgba(254,246,138,0.2); }
+[data-theme="dark"] .pinned-content th,
+[data-theme="dark"] .pinned-content td {
+  border-color: rgba(254,246,138,0.2);
+}
+[data-theme="dark"] .pinned-content th {
+  background: rgba(254,246,138,0.08);
+}
+[data-theme="dark"] .pinned-content td {
+  background: rgba(0,0,0,0.15);
+}
 
 [data-theme="dark"] .pinned-sticky {
   background: #5a4a2a;
@@ -573,11 +606,11 @@ async function handleDelete() {
   line-height: 1.5;
   color: #3a2a1a;
   margin: 0;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 .reply-text p {
   margin: 0 0 6px;
+  white-space: pre-wrap;
 }
 .reply-text p:last-child {
   margin-bottom: 0;
@@ -595,6 +628,7 @@ async function handleDelete() {
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.9em;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 .reply-text pre {
   background: rgba(0,0,0,0.05);
@@ -628,6 +662,26 @@ async function handleDelete() {
   max-width: 100%;
   border-radius: 4px;
   margin: 6px 0;
+}
+.reply-text table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 0.85em;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.reply-text th,
+.reply-text td {
+  border: 1px solid rgba(0,0,0,0.15);
+  padding: 5px 8px;
+  text-align: left;
+}
+.reply-text th {
+  background: rgba(0,0,0,0.04);
+  font-weight: 600;
+}
+.reply-text td {
+  background: rgba(255,255,255,0.5);
 }
 .reply-files {
   display: flex;
@@ -683,6 +737,10 @@ async function handleDelete() {
 }
 [data-theme="dark"] .reply-text code {
   background: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .reply-text th,
+[data-theme="dark"] .reply-text td {
+  border-color: rgba(255,255,255,0.15);
 }
 [data-theme="dark"] .reply-time {
   color: #a89880;

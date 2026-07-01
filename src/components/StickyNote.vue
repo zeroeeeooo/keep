@@ -178,13 +178,13 @@ function isImageUrl(path) {
 .sticky-content {
   font-size: 14px;
   line-height: 1.6;
-  white-space: pre-wrap;
   word-break: break-word;
   font-family: 'KaiTi', 'STKaiti', '楷体', cursive;
   margin: 0;
 }
 .sticky-content p {
   margin: 0 0 6px;
+  white-space: pre-wrap;
 }
 .sticky-content p:last-child {
   margin-bottom: 0;
@@ -202,6 +202,7 @@ function isImageUrl(path) {
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.9em;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 .sticky-content pre {
   background: rgba(0,0,0,0.08);
@@ -241,6 +242,37 @@ function isImageUrl(path) {
   border: none;
   border-top: 1px solid rgba(0,0,0,0.15);
   margin: 10px 0;
+}
+.sticky-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 0.85em;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.sticky-content th,
+.sticky-content td {
+  border: 1px solid rgba(0,0,0,0.15);
+  padding: 5px 8px;
+  text-align: left;
+}
+.sticky-content th {
+  background: rgba(0,0,0,0.06);
+  font-weight: 600;
+}
+.sticky-content td {
+  background: rgba(255,255,255,0.3);
+}
+
+[data-theme="dark"] .sticky-content th,
+[data-theme="dark"] .sticky-content td {
+  border-color: rgba(255,255,255,0.15);
+}
+[data-theme="dark"] .sticky-content th {
+  background: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .sticky-content td {
+  background: rgba(0,0,0,0.15);
 }
 
 .sticky-files {

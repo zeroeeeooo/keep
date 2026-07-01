@@ -164,11 +164,11 @@ const formattedTime = computed(() => {
     inset 0 1px 2px rgba(0,0,0,0.04);
 }
 .note-content :deep(.md-body) {
-  white-space: pre-wrap;
   word-break: break-word;
 }
 .note-content :deep(.md-body) p {
   margin: 0 0 8px;
+  white-space: pre-wrap;
 }
 .note-content :deep(.md-body) p:last-child {
   margin-bottom: 0;
@@ -186,6 +186,7 @@ const formattedTime = computed(() => {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.9em;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 .note-content :deep(.md-body) pre {
   background: rgba(0,0,0,0.06);
@@ -232,6 +233,7 @@ const formattedTime = computed(() => {
   width: 100%;
   margin: 8px 0;
   font-size: 0.9em;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 .note-content :deep(.md-body) th,
 .note-content :deep(.md-body) td {
@@ -242,6 +244,9 @@ const formattedTime = computed(() => {
 .note-content :deep(.md-body) th {
   background: rgba(0,0,0,0.03);
   font-weight: 600;
+}
+.note-content :deep(.md-body) td {
+  background: rgba(255,255,255,0.4);
 }
 
 /* ===== Files Grid (3 columns) ===== */
