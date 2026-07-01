@@ -72,6 +72,16 @@ export const useAuthStore = defineStore('auth', () => {
     clearStorage()
   }
 
+  async function updateAvatar(file) {
+    const res = await authApi.uploadAvatar(file)
+    if (res.ok) {
+      user.value = { ...user.value, avatar: res.data.avatar }
+      saveSession(token.value, user.value)
+      return { ok: true }
+    }
+    return { ok: false, message: res.message || '上传失败' }
+  }
+
   return {
     // state
     token,
@@ -82,6 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
     // actions
     login,
     register,
-    logout
+    logout,
+    updateAvatar
   }
 })

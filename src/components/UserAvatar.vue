@@ -1,9 +1,10 @@
 <template>
   <div
     :class="['user-avatar', sizeClass, { 'avatar-friend': friend }]"
-    :style="gradientStyle"
+    :style="!src ? gradientStyle : undefined"
   >
-    {{ initial }}
+    <img v-if="src" :src="src" :alt="name" class="avatar-img" />
+    <span v-else>{{ initial }}</span>
   </div>
 </template>
 
@@ -14,7 +15,8 @@ const props = defineProps({
   name: { type: String, default: '?' },
   size: { type: String, default: 'md' },
   friend: { type: Boolean, default: false },
-  gradient: { type: String, default: null }
+  gradient: { type: String, default: null },
+  src: { type: String, default: null }
 })
 
 const initial = computed(() => (props.name || '?').charAt(0))
@@ -38,6 +40,14 @@ const gradientStyle = computed(() => {
   justify-content: center;
   flex-shrink: 0;
   line-height: 1;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .avatar-friend {

@@ -51,6 +51,7 @@ export async function initDB() {
       username   VARCHAR(50)  NOT NULL UNIQUE,
       nickname   VARCHAR(50)  NOT NULL DEFAULT '',
       password   VARCHAR(255) NOT NULL,
+      avatar     VARCHAR(500) DEFAULT NULL,
       created_at VARCHAR(30)  NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `)
@@ -133,7 +134,7 @@ export async function initDB() {
 // 查找用户（不包含密码，用于对外展示）
 export async function findUserByUsername(username) {
   const [rows] = await pool.execute(
-    'SELECT id, username, nickname, created_at FROM users WHERE username = ?', [username]
+    'SELECT id, username, nickname, avatar, created_at FROM users WHERE username = ?', [username]
   )
   return rows.length > 0 ? rows[0] : null
 }
@@ -148,9 +149,16 @@ export async function findUserByUsernameWithPassword(username) {
 
 export async function findUserById(id) {
   const [rows] = await pool.execute(
-    'SELECT id, username, nickname, created_at FROM users WHERE id = ?', [id]
+    'SELECT id, username, nickname, avatar, created_at FROM users WHERE id = ?', [id]
   )
   return rows.length > 0 ? rows[0] : null
+}
+
+export async function updateUserAvatar(userId, avatarUrl) {
+  await pool.execute(
+    'UPDATE users SET avatar = ? WHERE id = ?',
+    [avatarUrl, userId]
+  )
 }
 
 export async function createUser(username, password, nickname) {
@@ -163,6 +171,7 @@ export async function createUser(username, password, nickname) {
     username,
     nickname,
     password,
+    avatar: null,
     created_at: new Date().toISOString()
   }
 }

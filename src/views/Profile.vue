@@ -19,18 +19,31 @@
     </header>
 
     <div class="profile-body">
+      <!-- Toast -->
+      <Transition name="toast">
+        <div v-if="toast.show" :class="['toast', 'toast-' + toast.type]">{{ toast.message }}</div>
+      </Transition>
+
       <!-- ===== Profile Card ===== -->
       <div class="profile-card card stagger-item">
         <div class="avatar-section">
           <div class="avatar-ring">
-            <UserAvatar :name="displayName" size="xl" />
+            <UserAvatar :name="displayName" :src="avatarUrl" size="xl" />
           </div>
-          <button class="avatar-edit-btn" title="编辑资料">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <button class="avatar-edit-btn" title="修改头像" :disabled="uploading" @click="triggerFileSelect">
+            <svg v-if="!uploading" width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M10.5 1.5l2 2L5 11l-2.5.5L3 9l7.5-7.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
               <path d="M9 3l2 2" stroke="currentColor" stroke-width="1.3"/>
             </svg>
+            <span v-else class="avatar-edit-spinner"></span>
           </button>
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            class="avatar-file-input"
+            @change="onFileChange"
+          />
         </div>
         <h2 class="profile-nickname">{{ displayName }}</h2>
         <p class="profile-username">@{{ auth.user?.username }}</p>
@@ -146,6 +159,8 @@ const topicStore = useTopicStore()
 // ---- Data ----
 const friendCount = ref(0)
 const topicCount = ref(0)
+const uploading = ref(false)
+const toast = ref({ show: false, message: '', type: '' })
 
 const statRefs = {}
 
@@ -153,9 +168,64 @@ const friendsList = computed(() => friends.friends)
 
 const displayName = computed(() => auth.user?.nickname || auth.user?.username || '用户')
 
+const avatarUrl = computed(() => {
+  return auth.user?.avatar || null
+})
+
 const userBio = computed(() => {
   return ''
 })
+
+// ---- Avatar Upload ----
+const fileInput = ref(null)
+
+function triggerFileSelect() {
+  if (uploading.value) return
+  fileInput.value?.click()
+}
+
+function onFileChange(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  // 校验文件类型
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowed.includes(file.type)) {
+    showToast('仅支持 JPG/PNG/GIF/WebP 格式', 'error')
+    return
+  }
+
+  // 校验大小 (2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('图片大小不能超过 2MB', 'error')
+    return
+  }
+
+  uploading.value = true
+  showToast('上传中…', 'info')
+
+  auth.updateAvatar(file).then(res => {
+    uploading.value = false
+    if (res.ok) {
+      showToast('头像更新成功', 'success')
+    } else {
+      showToast(res.message || '上传失败', 'error')
+    }
+  }).catch(() => {
+    uploading.value = false
+    showToast('上传失败，请重试', 'error')
+  })
+
+  // 清空 input 以便重复选择同一文件
+  e.target.value = ''
+}
+
+function showToast(message, type = 'info') {
+  toast.value = { show: true, message, type }
+  setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
 
 // ---- Stats ----
 const stats = computed(() => [
@@ -694,6 +764,71 @@ const topicIcon = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none"><
   color: var(--color-primary);
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  z-index: 200;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+}
+.toast-success {
+  background: var(--color-primary);
+  color: #fff;
+}
+.toast-error {
+  background: var(--color-error);
+  color: #fff;
+}
+.toast-info {
+  background: var(--text-primary);
+  color: var(--text-inverse);
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+.toast-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-12px);
+}
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-12px);
+}
+
+/* ===== Avatar ===== */
+.avatar-file-input {
+  display: none;
+}
+
+.avatar-edit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.avatar-edit-spinner {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ===== Entry Animation ===== */

@@ -16,5 +16,11 @@ export const authApi = {
 
   me() {
     return api.get(`${BASE}/me`)
+  },
+
+  uploadAvatar(file) {
+    const formData = new FormData()
+    formData.append('avatar', file)
+    return api.upload(`${BASE}/avatar`, formData)
   }
 }

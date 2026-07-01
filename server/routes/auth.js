@@ -1,13 +1,35 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { findUserByUsername, findUserByUsernameWithPassword, findUserById, createUser } from '../db.js'
+import multer from 'multer'
+import path from 'path'
+import fs from 'fs'
+import { findUserByUsername, findUserByUsernameWithPassword, findUserById, createUser, updateUserAvatar } from '../db.js'
 import { config } from '../config.js'
 
 const router = Router()
 
 const JWT_SECRET = config.JWT_SECRET
 const SALT_ROUNDS = config.SALT_ROUNDS
+
+// 头像上传目录
+const AVATAR_DIR = path.resolve('server/uploads/avatars')
+if (!fs.existsSync(AVATAR_DIR)) {
+  fs.mkdirSync(AVATAR_DIR, { recursive: true })
+}
+
+const avatarUpload = multer({
+  dest: AVATAR_DIR,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true)
+    } else {
+      cb(new Error('仅支持 JPG/PNG/GIF/WebP 格式'))
+    }
+  }
+})
 
 // 注册
 router.post('/register', async (req, res) => {
@@ -47,7 +69,7 @@ router.post('/register', async (req, res) => {
       message: '注册成功',
       data: {
         token,
-        user: { id: newUser.id, username, nickname: displayName }
+        user: { id: newUser.id, username, nickname: displayName, avatar: null }
       }
     })
   } catch (err) {
@@ -87,7 +109,7 @@ router.post('/login', async (req, res) => {
       message: '登录成功',
       data: {
         token,
-        user: { id: user.id, username: user.username, nickname: user.nickname }
+        user: { id: user.id, username: user.username, nickname: user.nickname, avatar: user.avatar }
       }
     })
   } catch (err) {
@@ -120,12 +142,60 @@ router.get('/me', async (req, res) => {
           id: user.id,
           username: user.username,
           nickname: user.nickname,
+          avatar: user.avatar,
           created_at: user.created_at
         }
       }
     })
   } catch (err) {
     return res.status(401).json({ ok: false, message: 'token 无效或已过期' })
+  }
+})
+
+// 上传头像
+router.post('/avatar', avatarUpload.single('avatar'), async (req, res) => {
+  try {
+    // 验证登录
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+      return res.status(401).json({ ok: false, message: '未登录' })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const decoded = jwt.verify(token, JWT_SECRET)
+
+    const file = req.file
+    if (!file) {
+      return res.status(400).json({ ok: false, message: '请选择图片' })
+    }
+
+    // 生成文件名
+    const ext = path.extname(file.originalname) || '.png'
+    const filename = `avatar_${decoded.userId}${ext}`
+    const destPath = path.join(AVATAR_DIR, filename)
+
+    // 重命名上传文件
+    fs.renameSync(file.path, destPath)
+
+    // 删除旧头像文件（如果有）
+    const oldUser = await findUserById(decoded.userId)
+    if (oldUser?.avatar) {
+      const oldPath = path.resolve('server/uploads/avatars', path.basename(oldUser.avatar))
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath)
+      }
+    }
+
+    const avatarUrl = `/uploads/avatars/${filename}`
+    await updateUserAvatar(decoded.userId, avatarUrl)
+
+    res.json({
+      ok: true,
+      message: '头像更新成功',
+      data: { avatar: avatarUrl }
+    })
+  } catch (err) {
+    console.error('Avatar upload error:', err)
+    res.status(500).json({ ok: false, message: '上传失败' })
   }
 })
 
