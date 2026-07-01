@@ -177,7 +177,7 @@ function isImageUrl(path) {
 
 .sticky-content {
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.5;
   word-break: break-word;
   font-family: var(--font-sans);
   margin: 0;

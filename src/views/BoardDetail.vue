@@ -379,7 +379,7 @@ async function handleDelete() {
 }
 .pinned-content {
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #5a4a2a;
   font-family: var(--font-sans);
   margin: 0;
