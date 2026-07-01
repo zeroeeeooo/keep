@@ -23,7 +23,7 @@
               <span class="pinned-time">{{ formatTime(topic.created_at) }}</span>
             </div>
           </div>
-          <p class="pinned-content">{{ topic.content }}</p>
+          <div class="pinned-content md-body" v-html="renderedTopic"></div>
           <div v-if="topicFiles.length" class="pinned-files">
             <template v-for="(f, i) in topicFiles" :key="i">
               <img v-if="isImageUrl(f.url)" :src="f.url" class="pinned-img" loading="lazy" @click="openImage(f.url)" />
@@ -57,7 +57,7 @@
               <span class="reply-name">{{ reply.nickname || reply.username }}</span>
               <span class="reply-time">{{ formatTime(reply.created_at) }}</span>
             </div>
-            <p class="reply-text">{{ reply.content }}</p>
+            <div class="reply-text md-body" v-html="renderedReply(reply)"></div>
             <div v-if="reply.files && reply.files.length" class="reply-files">
               <template v-for="(f, fi) in normalizeFiles(reply.files)" :key="fi">
                 <img v-if="isImageUrl(f.url)" :src="f.url" class="reply-img" loading="lazy" @click="openImage(f.url)" />
@@ -128,6 +128,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore.js'
 import { useTopicStore } from '../stores/topicStore.js'
 import UserAvatar from '../components/UserAvatar.vue'
+import { renderMarkdown } from '../utils/markdown.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -157,6 +158,12 @@ function normalizeFiles(files) {
 }
 
 const topicFiles = computed(() => normalizeFiles(topic.value?.files))
+
+const renderedTopic = computed(() => renderMarkdown(topic.value?.content || ''))
+
+function renderedReply(reply) {
+  return renderMarkdown(reply.content || '')
+}
 
 function isImageUrl(path) {
   return /\.(jpg|jpeg|png|gif|webp)$/i.test(path)
@@ -378,6 +385,65 @@ async function handleDelete() {
   margin: 0;
   white-space: pre-wrap;
 }
+.pinned-content p {
+  margin: 0 0 6px;
+}
+.pinned-content p:last-child {
+  margin-bottom: 0;
+}
+.pinned-content ul,
+.pinned-content ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.pinned-content li {
+  margin-bottom: 2px;
+}
+.pinned-content code {
+  background: rgba(0,0,0,0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.pinned-content pre {
+  background: rgba(0,0,0,0.06);
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+.pinned-content pre code {
+  background: none;
+  padding: 0;
+}
+.pinned-content blockquote {
+  border-left: 3px solid rgba(90,74,42,0.3);
+  margin: 6px 0;
+  padding: 4px 10px;
+  opacity: 0.8;
+}
+.pinned-content a {
+  color: #5a4a2a;
+  text-decoration: underline;
+}
+.pinned-content h1,
+.pinned-content h2,
+.pinned-content h3,
+.pinned-content h4 {
+  margin: 10px 0 4px;
+  line-height: 1.3;
+  color: #5a4a2a;
+}
+.pinned-content img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 6px 0;
+}
+.pinned-content hr {
+  border: none;
+  border-top: 1px solid rgba(90,74,42,0.2);
+  margin: 10px 0;
+}
 .pinned-files {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -416,6 +482,20 @@ async function handleDelete() {
   white-space: nowrap;
 }
 [data-theme="dark"] .pinned-content { color: #fef68a; }
+[data-theme="dark"] .pinned-content p,
+[data-theme="dark"] .pinned-content h1,
+[data-theme="dark"] .pinned-content h2,
+[data-theme="dark"] .pinned-content h3,
+[data-theme="dark"] .pinned-content h4,
+[data-theme="dark"] .pinned-content li { color: #fef68a; }
+[data-theme="dark"] .pinned-content a { color: #fef68a; }
+[data-theme="dark"] .pinned-content code { background: rgba(255,255,255,0.1); }
+[data-theme="dark"] .pinned-content pre { background: rgba(0,0,0,0.2); }
+[data-theme="dark"] .pinned-content blockquote {
+  border-left-color: rgba(254,246,138,0.3);
+  background: rgba(0,0,0,0.1);
+}
+[data-theme="dark"] .pinned-content hr { border-top-color: rgba(254,246,138,0.2); }
 
 [data-theme="dark"] .pinned-sticky {
   background: #5a4a2a;
@@ -496,6 +576,59 @@ async function handleDelete() {
   white-space: pre-wrap;
   word-break: break-word;
 }
+.reply-text p {
+  margin: 0 0 6px;
+}
+.reply-text p:last-child {
+  margin-bottom: 0;
+}
+.reply-text ul,
+.reply-text ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.reply-text li {
+  margin-bottom: 2px;
+}
+.reply-text code {
+  background: rgba(0,0,0,0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.reply-text pre {
+  background: rgba(0,0,0,0.05);
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+.reply-text pre code {
+  background: none;
+  padding: 0;
+}
+.reply-text blockquote {
+  border-left: 3px solid rgba(0,0,0,0.15);
+  margin: 6px 0;
+  padding: 4px 10px;
+  opacity: 0.8;
+}
+.reply-text a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.reply-text h1,
+.reply-text h2,
+.reply-text h3,
+.reply-text h4 {
+  margin: 10px 0 4px;
+  line-height: 1.3;
+}
+.reply-text img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 6px 0;
+}
 .reply-files {
   display: flex;
   flex-wrap: wrap;
@@ -543,6 +676,13 @@ async function handleDelete() {
 [data-theme="dark"] .reply-name,
 [data-theme="dark"] .reply-text {
   color: #e8dcc8;
+}
+[data-theme="dark"] .reply-text p,
+[data-theme="dark"] .reply-text li {
+  color: #e8dcc8;
+}
+[data-theme="dark"] .reply-text code {
+  background: rgba(255,255,255,0.1);
 }
 [data-theme="dark"] .reply-time {
   color: #a89880;

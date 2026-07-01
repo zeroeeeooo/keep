@@ -11,7 +11,7 @@
 
     <!-- Content area (inset shadow) -->
     <div v-if="content" class="note-content">
-      <p v-text="content"></p>
+      <div class="md-body" v-html="renderedContent"></div>
     </div>
 
     <!-- Files grid (3 columns) -->
@@ -55,6 +55,7 @@
 <script setup>
 import { computed } from 'vue'
 import UserAvatar from './UserAvatar.vue'
+import { renderMarkdown } from '../utils/markdown.js'
 
 const props = defineProps({
   authorName: { type: String, default: '?' },
@@ -66,6 +67,8 @@ const props = defineProps({
 })
 
 defineEmits(['delete', 'preview'])
+
+const renderedContent = computed(() => renderMarkdown(props.content))
 
 /** 标准化文件数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
 const normalizedFiles = computed(() => {
@@ -160,10 +163,85 @@ const formattedTime = computed(() => {
   box-shadow:
     inset 0 1px 2px rgba(0,0,0,0.04);
 }
-.note-content p {
+.note-content :deep(.md-body) {
   white-space: pre-wrap;
   word-break: break-word;
-  margin: 0;
+}
+.note-content :deep(.md-body) p {
+  margin: 0 0 8px;
+}
+.note-content :deep(.md-body) p:last-child {
+  margin-bottom: 0;
+}
+.note-content :deep(.md-body) ul,
+.note-content :deep(.md-body) ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+.note-content :deep(.md-body) li {
+  margin-bottom: 2px;
+}
+.note-content :deep(.md-body) code {
+  background: rgba(0,0,0,0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.note-content :deep(.md-body) pre {
+  background: rgba(0,0,0,0.06);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.note-content :deep(.md-body) pre code {
+  background: none;
+  padding: 0;
+}
+.note-content :deep(.md-body) blockquote {
+  border-left: 3px solid var(--color-primary);
+  margin: 8px 0;
+  padding: 4px 12px;
+  color: var(--text-secondary);
+  background: rgba(0,0,0,0.02);
+  border-radius: 0 4px 4px 0;
+}
+.note-content :deep(.md-body) a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.note-content :deep(.md-body) h1,
+.note-content :deep(.md-body) h2,
+.note-content :deep(.md-body) h3,
+.note-content :deep(.md-body) h4 {
+  margin: 12px 0 6px;
+  line-height: 1.4;
+}
+.note-content :deep(.md-body) img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+.note-content :deep(.md-body) hr {
+  border: none;
+  border-top: 1px solid var(--border-light);
+  margin: 12px 0;
+}
+.note-content :deep(.md-body) table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 0.9em;
+}
+.note-content :deep(.md-body) th,
+.note-content :deep(.md-body) td {
+  border: 1px solid var(--border-light);
+  padding: 6px 10px;
+  text-align: left;
+}
+.note-content :deep(.md-body) th {
+  background: rgba(0,0,0,0.03);
+  font-weight: 600;
 }
 
 /* ===== Files Grid (3 columns) ===== */

@@ -15,7 +15,7 @@
         <span class="sticky-time">{{ formattedTime }}</span>
       </div>
     </div>
-    <p class="sticky-content">{{ content }}</p>
+    <div class="sticky-content md-body" v-html="renderedContent"></div>
     <div v-if="normalizedFiles.length" class="sticky-files">
       <template v-for="(f, i) in normalizedFiles" :key="i">
         <img v-if="isImageUrl(f.url)" :src="f.url" class="sticky-file-img" loading="lazy" @click.stop.prevent="$emit('preview', f.url)" />
@@ -40,6 +40,7 @@
 import { computed } from 'vue'
 import UserAvatar from './UserAvatar.vue'
 import PushPin from './PushPin.vue'
+import { renderMarkdown } from '../utils/markdown.js'
 
 const props = defineProps({
   authorName: { type: String, default: '?' },
@@ -55,6 +56,8 @@ const props = defineProps({
 })
 
 defineEmits(['click', 'preview'])
+
+const renderedContent = computed(() => renderMarkdown(props.content))
 
 /** 标准化文件数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
 const normalizedFiles = computed(() => {
@@ -179,6 +182,65 @@ function isImageUrl(path) {
   word-break: break-word;
   font-family: 'KaiTi', 'STKaiti', '楷体', cursive;
   margin: 0;
+}
+.sticky-content p {
+  margin: 0 0 6px;
+}
+.sticky-content p:last-child {
+  margin-bottom: 0;
+}
+.sticky-content ul,
+.sticky-content ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.sticky-content li {
+  margin-bottom: 2px;
+}
+.sticky-content code {
+  background: rgba(0,0,0,0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.sticky-content pre {
+  background: rgba(0,0,0,0.08);
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+.sticky-content pre code {
+  background: none;
+  padding: 0;
+}
+.sticky-content blockquote {
+  border-left: 3px solid rgba(0,0,0,0.2);
+  margin: 6px 0;
+  padding: 4px 10px;
+  opacity: 0.8;
+}
+.sticky-content a {
+  color: inherit;
+  text-decoration: underline;
+  opacity: 0.8;
+}
+.sticky-content h1,
+.sticky-content h2,
+.sticky-content h3,
+.sticky-content h4 {
+  margin: 10px 0 4px;
+  line-height: 1.3;
+}
+.sticky-content img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 6px 0;
+}
+.sticky-content hr {
+  border: none;
+  border-top: 1px solid rgba(0,0,0,0.15);
+  margin: 10px 0;
 }
 
 .sticky-files {
