@@ -6,3 +6,17 @@
 .env.local
 .env.development
 # .env.production 需要提交，供 Vite 构建使用
+
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+
+# 用户上传文件（图片/PDF）
+server/uploads/
+
+# 开发工具配置
+.agents/
+.codewhale/
+.kilo/
