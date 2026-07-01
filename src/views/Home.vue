@@ -26,7 +26,7 @@
         <aside v-if="sidebarOpen" class="sidebar">
           <div class="sidebar-header">
             <div class="sidebar-user">
-              <div class="sidebar-avatar">{{ (auth.user?.nickname || auth.user?.username || '?').charAt(0) }}</div>
+              <UserAvatar :name="auth.user?.nickname || auth.user?.username" :src="auth.user?.avatar" size="md" />
               <div class="sidebar-user-info">
                 <span class="sidebar-username">{{ auth.user?.nickname }}</span>
                 <span class="sidebar-usertag">@{{ auth.user?.username }}</span>
@@ -113,6 +113,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore.js'
+import UserAvatar from '../components/UserAvatar.vue'
 
 const router = useRouter()
 const auth = useAuthStore()

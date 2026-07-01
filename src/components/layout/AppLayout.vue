@@ -14,6 +14,7 @@
       :open="sidebarOpen"
       :displayName="displayName"
       :displayTag="displayTag"
+      :avatarSrc="avatarSrc"
       :items="navItems"
       @close="$emit('update:sidebarOpen', false)"
     />
@@ -33,6 +34,7 @@ const props = defineProps({
   sidebarOpen: { type: Boolean, default: false },
   displayName: { type: String, default: '用户' },
   displayTag: { type: String, default: '' },
+  avatarSrc: { type: String, default: null },
   padded: { type: Boolean, default: true },
   navItems: {
     type: Array,

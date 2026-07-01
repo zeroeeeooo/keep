@@ -105,6 +105,15 @@ router.post('/', authMiddleware, uploadMiddleware, async (req, res) => {
   }
 })
 
+function safeFiles(files) {
+  if (!files) return []
+  if (Array.isArray(files)) return files
+  if (typeof files === 'string') {
+    try { return JSON.parse(files) } catch { return [files] }
+  }
+  return []
+}
+
 // ---- 获取笔记列表（自己的 + 好友的）----
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -115,7 +124,7 @@ router.get('/', authMiddleware, async (req, res) => {
     // 解析 files JSON
     const result = notes.map(n => ({
       ...n,
-      files: n.files ? JSON.parse(n.files) : []
+      files: safeFiles(n.files)
     }))
 
     res.json({ ok: true, data: { notes: result } })
@@ -134,7 +143,7 @@ router.get('/mine', authMiddleware, async (req, res) => {
 
     const result = notes.map(n => ({
       ...n,
-      files: n.files ? JSON.parse(n.files) : []
+      files: safeFiles(n.files)
     }))
 
     res.json({ ok: true, data: { notes: result } })

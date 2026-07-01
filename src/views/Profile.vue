@@ -160,6 +160,7 @@ const topicStore = useTopicStore()
 const friendCount = ref(0)
 const topicCount = ref(0)
 const uploading = ref(false)
+const avatarKey = ref(Date.now())
 const toast = ref({ show: false, message: '', type: '' })
 
 const statRefs = {}
@@ -169,7 +170,7 @@ const friendsList = computed(() => friends.friends)
 const displayName = computed(() => auth.user?.nickname || auth.user?.username || '用户')
 
 const avatarUrl = computed(() => {
-  return auth.user?.avatar || null
+  return auth.user?.avatar ? auth.user.avatar + '?t=' + avatarKey.value : null
 })
 
 const userBio = computed(() => {
@@ -195,18 +196,13 @@ function onFileChange(e) {
     return
   }
 
-  // 校验大小 (2MB)
-  if (file.size > 2 * 1024 * 1024) {
-    showToast('图片大小不能超过 2MB', 'error')
-    return
-  }
-
   uploading.value = true
   showToast('上传中…', 'info')
 
   auth.updateAvatar(file).then(res => {
     uploading.value = false
     if (res.ok) {
+      avatarKey.value = Date.now()
       showToast('头像更新成功', 'success')
     } else {
       showToast(res.message || '上传失败', 'error')

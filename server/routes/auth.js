@@ -20,7 +20,6 @@ if (!fs.existsSync(AVATAR_DIR)) {
 
 const avatarUpload = multer({
   dest: AVATAR_DIR,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
   fileFilter: (req, file, cb) => {
     const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
     if (allowed.includes(file.mimetype)) {
@@ -168,19 +167,22 @@ router.post('/avatar', avatarUpload.single('avatar'), async (req, res) => {
       return res.status(400).json({ ok: false, message: '请选择图片' })
     }
 
-    // 生成文件名
+    // 生成文件名（用时间戳避免同名覆盖缓存问题）
     const ext = path.extname(file.originalname) || '.png'
-    const filename = `avatar_${decoded.userId}${ext}`
+    const filename = `avatar_${decoded.userId}_${Date.now()}${ext}`
     const destPath = path.join(AVATAR_DIR, filename)
 
-    // 重命名上传文件
+    // 先查旧头像信息
+    const oldUser = await findUserById(decoded.userId)
+
+    // 保存新文件
     fs.renameSync(file.path, destPath)
 
-    // 删除旧头像文件（如果有）
-    const oldUser = await findUserById(decoded.userId)
+    // 删除旧头像文件（确保不是新文件）
     if (oldUser?.avatar) {
-      const oldPath = path.resolve('server/uploads/avatars', path.basename(oldUser.avatar))
-      if (fs.existsSync(oldPath)) {
+      const oldFileName = path.basename(oldUser.avatar)
+      const oldPath = path.join(AVATAR_DIR, oldFileName)
+      if (fs.existsSync(oldPath) && oldPath !== destPath) {
         fs.unlinkSync(oldPath)
       }
     }

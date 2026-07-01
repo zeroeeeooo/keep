@@ -17,7 +17,7 @@
     <div class="notes-body">
       <!-- 发布框 -->
       <div class="compose-card">
-        <UserAvatar :name="authorName" size="md" />
+        <UserAvatar :name="authorName" size="md" :src="auth.user?.avatar" />
         <div class="compose-main">
           <textarea
             v-model="composeContent"

@@ -3,7 +3,7 @@
     <aside v-if="open" class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-user">
-          <UserAvatar :name="displayName" size="lg" />
+          <UserAvatar :name="displayName" size="lg" :src="avatarSrc" />
           <div class="sidebar-user-info">
             <span class="sidebar-username">{{ displayName }}</span>
             <span v-if="displayTag" class="sidebar-usertag">@{{ displayTag }}</span>
@@ -57,6 +57,7 @@ const props = defineProps({
   open: { type: Boolean, default: false },
   displayName: { type: String, default: '用户' },
   displayTag: { type: String, default: '' },
+  avatarSrc: { type: String, default: null },
   items: { type: Array, default: () => [] }
 })
 
