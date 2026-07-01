@@ -22,8 +22,7 @@ server/uploads/
 .kilo/
 
 # Claude Code 工作区
-.claude/worktrees/
-.claude/memory/
+.claude/
 
 # 本地文档
 相关文档/
