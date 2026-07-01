@@ -24,8 +24,17 @@
             </div>
           </div>
           <p class="pinned-content">{{ topic.content }}</p>
-          <div v-if="topic.files && topic.files.length" class="pinned-files">
-            <img v-for="(f, i) in topic.files" :key="i" :src="f" class="pinned-img" loading="lazy" />
+          <div v-if="topicFiles.length" class="pinned-files">
+            <template v-for="(f, i) in topicFiles" :key="i">
+              <img v-if="isImageUrl(f.url)" :src="f.url" class="pinned-img" loading="lazy" />
+              <a v-else :href="f.url" class="pinned-pdf-link" target="_blank" :download="f.name">
+                <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                  <path d="M4 3h7l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M11 3v4h4" stroke="currentColor" stroke-width="1.3"/>
+                </svg>
+                <span class="pinned-pdf-name">{{ f.name }}</span>
+              </a>
+            </template>
           </div>
         </div>
       </div>
@@ -50,7 +59,16 @@
             </div>
             <p class="reply-text">{{ reply.content }}</p>
             <div v-if="reply.files && reply.files.length" class="reply-files">
-              <img v-for="(f, fi) in reply.files" :key="fi" :src="f" class="reply-img" loading="lazy" />
+              <template v-for="(f, fi) in normalizeFiles(reply.files)" :key="fi">
+                <img v-if="isImageUrl(f.url)" :src="f.url" class="reply-img" loading="lazy" />
+                <a v-else :href="f.url" class="reply-pdf-link" target="_blank" :download="f.name">
+                  <svg width="12" height="12" viewBox="0 0 18 18" fill="none">
+                    <path d="M4 3h7l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
+                    <path d="M11 3v4h4" stroke="currentColor" stroke-width="1.3"/>
+                  </svg>
+                  <span class="reply-pdf-name">{{ f.name }}</span>
+                </a>
+              </template>
             </div>
           </div>
         </div>
@@ -100,6 +118,21 @@ const replies = ref([])
 const replyContent = ref('')
 const loading = ref(false)
 const replyCount = computed(() => replies.value.length)
+
+/** 标准化文件对象数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
+function normalizeFiles(files) {
+  if (!files) return []
+  return files.map(f => {
+    if (typeof f === 'string') return { url: f, name: f.split('/').pop() }
+    return f
+  })
+}
+
+const topicFiles = computed(() => normalizeFiles(topic.value?.files))
+
+function isImageUrl(path) {
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(path)
+}
 
 onMounted(async () => {
   loading.value = true
@@ -294,7 +327,7 @@ async function handleDelete() {
 }
 .pinned-files {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   margin-top: 8px;
 }
@@ -304,10 +337,36 @@ async function handleDelete() {
   object-fit: cover;
   border-radius: 2px;
 }
+.pinned-pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 4px;
+  color: #5a4a2a;
+  text-decoration: none;
+  font-size: 11px;
+  grid-column: 1 / -1;
+  cursor: pointer;
+}
+.pinned-pdf-link:hover { background: rgba(0,0,0,0.12); }
+.pinned-pdf-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 [data-theme="dark"] .pinned-content { color: #fef68a; }
 
 [data-theme="dark"] .pinned-sticky {
   background: #5a4a2a;
+}
+[data-theme="dark"] .pinned-pdf-link {
+  color: #e8dcc8;
+  background: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .pinned-pdf-link:hover {
+  background: rgba(255,255,255,0.15);
 }
 [data-theme="dark"] .pinned-author,
 [data-theme="dark"] .pinned-content {
@@ -389,6 +448,25 @@ async function handleDelete() {
   height: 80px;
   object-fit: cover;
   border-radius: 4px;
+}
+.reply-pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 11px;
+  cursor: pointer;
+}
+.reply-pdf-link:hover { background: rgba(0,0,0,0.1); }
+.reply-pdf-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
 }
 
 [data-theme="dark"] .reply-inner {

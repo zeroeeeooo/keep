@@ -16,8 +16,17 @@
       </div>
     </div>
     <p class="sticky-content">{{ content }}</p>
-    <div v-if="files && files.length" class="sticky-files">
-      <img v-for="(f, i) in files" :key="i" :src="f" class="sticky-file-img" loading="lazy" @click.stop.prevent="$emit('preview', f)" />
+    <div v-if="normalizedFiles.length" class="sticky-files">
+      <template v-for="(f, i) in normalizedFiles" :key="i">
+        <img v-if="isImageUrl(f.url)" :src="f.url" class="sticky-file-img" loading="lazy" @click.stop.prevent="$emit('preview', f.url)" />
+        <a v-else :href="f.url" class="sticky-pdf-link" target="_blank" :download="f.name" @click.stop>
+          <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+            <path d="M4 3h7l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M11 3v4h4" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          <span class="sticky-pdf-name">{{ f.name }}</span>
+        </a>
+      </template>
     </div>
     <div class="sticky-footer">
       <span v-if="tags && tags.length" class="sticky-tag">{{ tags[0] }}</span>
@@ -47,6 +56,14 @@ const props = defineProps({
 
 defineEmits(['click', 'preview'])
 
+/** 标准化文件数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
+const normalizedFiles = computed(() => {
+  return (props.files || []).map(f => {
+    if (typeof f === 'string') return { url: f, name: f.split('/').pop() }
+    return f
+  })
+})
+
 const noteColorClass = computed(() => {
   if (props.isFriend) return 'note-blue'
   if (props.hasImage) return 'note-pink'
@@ -74,6 +91,10 @@ const formattedTime = computed(() => {
   if (diff < 172800000) return '昨天'
   return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
 })
+
+function isImageUrl(path) {
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(path)
+}
 </script>
 
 <style scoped>
@@ -162,7 +183,7 @@ const formattedTime = computed(() => {
 
 .sticky-files {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   margin-top: 4px;
 }
@@ -177,6 +198,28 @@ const formattedTime = computed(() => {
 }
 .sticky-file-img:hover {
   opacity: 0.8;
+}
+
+.sticky-pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 11px;
+  grid-column: 1 / -1;
+  cursor: pointer;
+}
+.sticky-pdf-link:hover {
+  background: rgba(0,0,0,0.12);
+}
+.sticky-pdf-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sticky-footer {

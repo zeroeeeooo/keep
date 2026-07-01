@@ -15,25 +15,25 @@
     </div>
 
     <!-- Files grid (3 columns) -->
-    <div v-if="files && files.length" class="note-files">
+    <div v-if="normalizedFiles.length" class="note-files">
       <a
-        v-for="(f, i) in files"
+        v-for="(f, i) in normalizedFiles"
         :key="i"
-        :href="f"
+        :href="f.url"
         class="file-item"
-        :class="{ 'file-item--image': isImage(f) }"
-        :download="isImage(f) ? undefined : f.split('/').pop()"
+        :class="{ 'file-item--image': isImageUrl(f.url) }"
+        :download="isImageUrl(f.url) ? undefined : f.name"
         target="_blank"
       >
-        <template v-if="isImage(f)">
-          <img :src="f" class="file-img" loading="lazy" @click.prevent="$emit('preview', f)" />
+        <template v-if="isImageUrl(f.url)">
+          <img :src="f.url" class="file-img" loading="lazy" @click.prevent="$emit('preview', f.url)" />
         </template>
         <template v-else>
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M4 3h7l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
             <path d="M11 3v4h4" stroke="currentColor" stroke-width="1.3"/>
           </svg>
-          <span class="file-name">{{ f.split('/').pop() }}</span>
+          <span class="file-name">{{ f.name }}</span>
         </template>
       </a>
     </div>
@@ -67,6 +67,18 @@ const props = defineProps({
 
 defineEmits(['delete', 'preview'])
 
+/** 标准化文件数组：兼容旧格式（字符串路径）和新格式（{url, name} 对象） */
+const normalizedFiles = computed(() => {
+  return (props.files || []).map(f => {
+    if (typeof f === 'string') return { url: f, name: f.split('/').pop() }
+    return f
+  })
+})
+
+function isImageUrl(path) {
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(path)
+}
+
 const formattedTime = computed(() => {
   if (!props.createdAt) return ''
   const d = new Date(props.createdAt)
@@ -78,10 +90,6 @@ const formattedTime = computed(() => {
   if (diff < 172800000) return '昨天'
   return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
 })
-
-function isImage(path) {
-  return /\.(jpg|jpeg|png|gif|webp)$/i.test(path)
-}
 </script>
 
 <style scoped>

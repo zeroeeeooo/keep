@@ -13,6 +13,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'WJFasdf123',
   database: DB_NAME,
+  charset: 'utf8mb4',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -26,6 +27,7 @@ async function ensureDatabase() {
     port: process.env.DB_PORT || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'WJFasdf123',
+    charset: 'utf8mb4',
     ...(IS_PROD ? { ssl: {} } : {})
   })
   await conn.execute(

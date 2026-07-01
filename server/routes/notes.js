@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import multer from 'multer'
 import path from 'path'
 import { createNote, getNotes, getMyNotes, deleteNote } from '../db.js'
+import { processUploadedFiles } from '../utils/fileProcessor.js'
 
 const router = Router()
 const JWT_SECRET = process.env.JWT_SECRET || 'keep-pro-secret-key-change-in-production'
@@ -13,7 +14,7 @@ const storage = multer.diskStorage({
     cb(null, 'server/uploads/')
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname)
+    const ext = path.extname(file.originalname).toLowerCase()
     const name = Date.now() + '-' + Math.random().toString(36).slice(2, 8)
     cb(null, name + ext)
   }
@@ -33,6 +34,27 @@ const upload = multer({
   }
 })
 
+// ---- 带错误处理的 multer 中间件 ----
+function uploadMiddleware(req, res, next) {
+  upload.array('files', 9)(req, res, (err) => {
+    if (err) {
+      // Multer 内部错误（文件过大、类型不对等）
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.json({ ok: false, message: '文件大小不能超过 20MB' })
+        }
+        if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+          return res.json({ ok: false, message: '超出最大文件数量（9个）' })
+        }
+        return res.json({ ok: false, message: '文件上传失败: ' + err.message })
+      }
+      // fileFilter 抛出的错误
+      return res.json({ ok: false, message: err.message })
+    }
+    next()
+  })
+}
+
 // ---- 中间件 ----
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization
@@ -50,14 +72,15 @@ function authMiddleware(req, res, next) {
 }
 
 // ---- 发布笔记 ----
-router.post('/', authMiddleware, upload.array('files', 9), async (req, res) => {
+router.post('/', authMiddleware, uploadMiddleware, async (req, res) => {
   try {
     const { content } = req.body
-    const files = req.files ? req.files.map(f => '/uploads/' + f.filename) : []
+
+    // 压缩图片（PDF 跳过）
+    const files = await processUploadedFiles(req.files)
 
     const noteId = await createNote(req.currentUser.userId, content, files.length ? files : null)
 
-    // 返回完整的笔记数据（含用户信息），前端可直接追加到列表
     const now = new Date().toISOString()
     res.json({
       ok: true,
