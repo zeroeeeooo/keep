@@ -4,9 +4,10 @@ import multer from 'multer'
 import path from 'path'
 import { createNote, getNotes, getMyNotes, deleteNote } from '../db.js'
 import { processUploadedFiles } from '../utils/fileProcessor.js'
+import { config } from '../config.js'
 
 const router = Router()
-const JWT_SECRET = process.env.JWT_SECRET || 'keep-pro-secret-key-change-in-production'
+const JWT_SECRET = config.JWT_SECRET
 
 // ---- 文件上传配置 ----
 const storage = multer.diskStorage({

@@ -1,17 +1,19 @@
 import mysql from 'mysql2/promise'
 import bcrypt from 'bcryptjs'
 
-const DB_NAME = process.env.DB_NAME || 'wyzwjf'
-const IS_PROD = process.env.NODE_ENV === 'production' || !!process.env.RENDER
+import { config } from './config.js'
+
+const DB_NAME = config.DB_NAME
+const IS_PROD = config.IS_PROD
 
 // 启动时自动创建数据库（如果不存在）
 await ensureDatabase()
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'WJFasdf123',
+  host: config.DB_HOST,
+  port: config.DB_PORT,
+  user: config.DB_USER,
+  password: config.DB_PASSWORD,
   database: DB_NAME,
   charset: 'utf8mb4',
   waitForConnections: true,
@@ -23,10 +25,10 @@ const pool = mysql.createPool({
 
 async function ensureDatabase() {
   const conn = await mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'WJFasdf123',
+    host: config.DB_HOST,
+    port: config.DB_PORT,
+    user: config.DB_USER,
+    password: config.DB_PASSWORD,
     charset: 'utf8mb4',
     ...(IS_PROD ? { ssl: {} } : {})
   })
@@ -113,12 +115,12 @@ export async function initDB() {
     'SELECT id FROM users WHERE username = ?', ['admin']
   )
   if (rows.length === 0) {
-    const hash = bcrypt.hashSync('123456', 10)
+    const hash = bcrypt.hashSync(config.ADMIN_PASSWORD, 10)
     await pool.execute(
       'INSERT INTO users (username, nickname, password, created_at) VALUES (?, ?, ?, ?)',
       ['admin', '管理员', hash, new Date().toISOString()]
     )
-    console.log('Default admin user created')
+    console.log('Default admin user created (password from config)')
   }
 
   console.log('Database initialized')

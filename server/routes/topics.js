@@ -6,9 +6,10 @@ import { fileURLToPath } from 'url'
 import { createTopic, getTopics, getMyTopics, getTopicById, deleteTopic,
          createReply, getReplies, deleteReply } from '../db.js'
 import { processUploadedFiles } from '../utils/fileProcessor.js'
+import { config } from '../config.js'
 
 const router = Router()
-const JWT_SECRET = process.env.JWT_SECRET || 'keep-pro-secret-key-change-in-production'
+const JWT_SECRET = config.JWT_SECRET
 
 // ---- 文件上传配置 ----
 const __dirname = path.dirname(fileURLToPath(import.meta.url))

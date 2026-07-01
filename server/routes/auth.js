@@ -2,11 +2,12 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { findUserByUsername, findUserByUsernameWithPassword, findUserById, createUser } from '../db.js'
+import { config } from '../config.js'
 
 const router = Router()
 
-const JWT_SECRET = process.env.JWT_SECRET || 'keep-pro-secret-key-change-in-production'
-const SALT_ROUNDS = 10
+const JWT_SECRET = config.JWT_SECRET
+const SALT_ROUNDS = config.SALT_ROUNDS
 
 // 注册
 router.post('/register', async (req, res) => {

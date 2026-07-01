@@ -90,7 +90,7 @@ npm install
 #   DB_USER       数据库用户名     默认 root
 #   DB_PASSWORD   数据库密码
 #   DB_NAME       数据库名         默认 wyzwjf
-#   JWT_SECRET    JWT 签名密钥     默认 keep-pro-secret-key...
+#   JWT_SECRET    JWT 签名密钥（生产环境必须设置）
 
 # 4. 确保 MySQL 正在运行，数据库和表会自动创建
 

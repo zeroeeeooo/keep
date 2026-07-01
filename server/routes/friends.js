@@ -12,10 +12,11 @@ import {
   getSentRequests,
   findUserById
 } from '../db.js'
+import { config } from '../config.js'
 
 const router = Router()
 
-const JWT_SECRET = process.env.JWT_SECRET || 'keep-pro-secret-key-change-in-production'
+const JWT_SECRET = config.JWT_SECRET
 
 // ---- 中间件：解析当前用户 ----
 function authMiddleware(req, res, next) {
