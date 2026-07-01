@@ -383,7 +383,7 @@ async function handleDelete() {
   color: #5a4a2a;
   font-family: var(--font-sans);
   margin: 0;
-  white-space: pre-wrap;
+  word-break: break-word;
 }
 .pinned-files {
   display: grid;
